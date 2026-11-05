@@ -69,4 +69,4 @@ IndexedDB `threadline` v1: `chats` (metadata + full text + chosen "you"), `files
 
 ## Testing
 
-`tools/smoke.cjs` drives Chromium through the home page, demo, tour, every tab, the menu, "change you", real-file load, error dialogs and a mobile pass, failing on any console or page error. There are no unit tests for the parser; see `docs/STATUS.md`.
+`tools/smoke.cjs` drives Chromium through the home page, demo, tour, every tab, the menu, "change you", real-file load, error dialogs and a mobile pass, failing on any console or page error. `tests/parser.test.cjs` (`node --test`) unit-tests `parseChat`, `attachMedia` and `computeStats` by extracting `CORE()` from `index.html`, with iOS and Android fixtures, date-order inference, media classification, streaks/gaps/reply times and the group reply matrix. It passes under several `TZ` values.
