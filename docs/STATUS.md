@@ -12,7 +12,7 @@ Audit date: 2026-11-05. State of `index.html` after the onboarding/UX overhaul.
 
 ## Not verified, so don't assume it works
 
-- **iOS-format exports** (`[d/m/y, h:mm:ss] Name: …`). The regex exists but only Android-format samples were tested.
+- **Real iOS exports.** `tests/parser.test.cjs` covers iOS-style headers with synthetic fixtures (24h, US 12h with narrow nbsp, dotted dates, LRM marks, `<attached:>`, `omitted`, deleted/edited), but the fixtures were written from knowledge of the format, not taken from a real export. Treat them as likely-correct, not proven.
 - **Real zips with media.** The synthetic tests have no media files, so the lightbox, thumbnails, video/audio playback, bulk .zip download and Wrapped photo-free path were only exercised through code reading and the demo.
 - **Scale.** Nothing larger than ~4,000 messages was run. The "multi-GB" design (lazy zip slices, worker parsing) is untested here.
 - **Safari and Firefox.** Only Chromium was run. `DecompressionStream('deflate-raw')` needs Safari 16.4+.
@@ -29,6 +29,8 @@ Audit date: 2026-11-05. State of `index.html` after the onboarding/UX overhaul.
 ## Known issues and decisions
 
 - `fmtN` uses the `en-IN` locale, so numbers ≥ 100,000 group as 1,00,000. Intentional for an Indian audience? Confirm before changing.
+- The last message of every export keeps a trailing `\n` (the file's final blank line is appended as a continuation). Harmless in the UI; pinned in a test with `trimEnd`.
+- Older iOS document lines (`name.pdf • 2 pages document omitted`) are parsed as plain text, not as an omitted document. Recorded as a `todo` test; the line format is unverified against a real export.
 - `renderTimeline` adds a click listener to its container each time it renders. `changeMe` works around this by replacing the view nodes; any new code that re-renders a view should do the same or use delegation.
 - IndexedDB is at schema v1 with no migration path.
 - `index.html` is ~1,900 lines and will keep growing. The parser (`CORE`) is the obvious first thing to extract into a testable module, but doing so conflicts with the single-file rule; if you do it, keep a build step that re-inlines it.
@@ -37,7 +39,7 @@ Audit date: 2026-11-05. State of `index.html` after the onboarding/UX overhaul.
 
 ## Backlog (suggested order)
 
-1. Parser unit tests with fixtures for iOS, 24-hour, `mdy`, `ymd`, multi-line messages, edited/deleted, group-system messages, non-English attachment lines.
+1. Extend parser tests with real-export-derived fixtures (replace the synthetic iOS ones) and non-English attachment lines.
 2. A tiny synthetic zip with a few real image/video/audio files, to cover the media paths in the smoke test.
 3. Light theme and a `prefers-color-scheme` switch.
 4. Make `fmtN` locale configurable.

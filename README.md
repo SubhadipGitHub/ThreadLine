@@ -47,6 +47,7 @@ First-time help is built in: a guided tour on your first chat, a tip at the top 
 
 ```bash
 node tools/make-sample-chat.mjs sample.txt --group   # synthetic export (DM by default)
+node --test "tests/*.test.cjs"                       # parser and stats unit tests (Node 22+, no install)
 node tools/smoke.cjs                                 # headless end-to-end test (needs playwright)
 ```
 

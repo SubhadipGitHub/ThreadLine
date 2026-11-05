@@ -15,6 +15,7 @@ Open `index.html` directly in a browser, or serve the folder with any static ser
 
 ```bash
 node tools/make-sample-chat.mjs out.txt [--group]   # synthetic Android-format export
+node --test "tests/*.test.cjs"                      # parser/stats unit tests, no browser or deps (Node 22+)
 node tools/smoke.cjs                                # headless end-to-end check (needs playwright + chromium)
 SHOTS=/some/dir node tools/smoke.cjs                # same, plus screenshots
 ```
@@ -24,6 +25,8 @@ Cheap syntax check of the inline script, without a browser:
 ```bash
 node -e "const s=require('fs').readFileSync('index.html','utf8');require('fs').writeFileSync('/tmp/app.js',s.match(/<script>([\s\S]*)<\/script>/)[1])" && node --check /tmp/app.js
 ```
+
+Unit tests load `CORE()` straight out of `index.html` (`tests/load-core.cjs` slices from `function CORE(){` to `const CORE_API=CORE();`), so keep those two markers intact. Fixtures are in `tests/fixtures.cjs`; invisible characters (LRM, narrow nbsp) are written as `\u` escapes there. When you change parsing or stats, add or adjust a test first.
 
 `tools/smoke.cjs` exits non-zero on any failed check or any console/page error. Run it after every change to `index.html`. Chromium and Playwright are preinstalled in Claude Code cloud sessions; elsewhere `npm i -D playwright && npx playwright install chromium`.
 
@@ -70,7 +73,7 @@ More detail in `docs/ARCHITECTURE.md`.
 
 ## Before you finish a change
 
-1. `node tools/smoke.cjs` passes (add a check for new behaviour).
+1. `node --test "tests/*.test.cjs"` and `node tools/smoke.cjs` pass (add a test for new behaviour).
 2. The no-network grep above is empty.
 3. Open it at desktop and 390 px width and look at the screenshots (`SHOTS=…`). Assertions miss visual regressions.
 4. Update `docs/STATUS.md` if you fixed or discovered a known issue.
