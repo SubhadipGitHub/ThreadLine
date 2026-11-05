@@ -1,0 +1,11 @@
+# Real chat exports are private. Never commit them.
+*.zip
+WhatsApp Chat*
+_chat.txt
+sample-chat*.txt
+
+# local tooling output
+node_modules/
+screenshots/
+.DS_Store
+.claude/settings.local.json
