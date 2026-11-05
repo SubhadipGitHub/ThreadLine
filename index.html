@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Threadline — WhatsApp Chat Analyzer</title>
+<style>
+:root{--bg:#07090d;--card:rgba(255,255,255,.035);--card2:rgba(255,255,255,.065);--line:rgba(255,255,255,.075);--line2:rgba(255,255,255,.14);--tx:#e9ecf2;--mut:#8b93a7;--dim:#5b6274;--a:#2dd4bf;--b:#a78bfa;--r:14px;--grad:linear-gradient(135deg,#2dd4bf,#60a5fa 50%,#a78bfa)}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--tx);font:13.5px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased}
+body{min-height:100vh}
+body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(38% 32% at 12% 8%,rgba(45,212,191,.11),transparent 70%),radial-gradient(34% 30% at 88% 0%,rgba(167,139,250,.13),transparent 70%),radial-gradient(40% 40% at 60% 105%,rgba(96,165,250,.06),transparent 70%);pointer-events:none;z-index:-1}
+body.noscroll{overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+a{color:#7dd3fc;text-decoration:none}a:hover{text-decoration:underline}
+.ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.fill{fill:currentColor;stroke:none}
+.mut{color:var(--mut)}.dim{color:var(--dim)}
+.num{font-variant-numeric:tabular-nums}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo{width:26px;height:26px;border-radius:8px;background:var(--grad);display:inline-grid;place-items:center;box-shadow:0 0 24px rgba(96,165,250,.35)}
+.logo::after{content:"";width:12px;height:12px;border:2.5px solid #07090d;border-radius:50% 50% 50% 2px}
+.logo.sm{width:22px;height:22px;border-radius:7px}.logo.sm::after{width:10px;height:10px;border-width:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+h3{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+h4{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:6px}
+.btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:9px;background:var(--card2);border:1px solid var(--line);font-weight:500;font-size:12.5px;white-space:nowrap;transition:.15s}
+.btn:hover{border-color:var(--line2);background:rgba(255,255,255,.09)}
+.btn.pri{background:var(--grad);color:#06080c;border:0;font-weight:650}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.on{border-color:var(--a);color:var(--a)}
+.btn:disabled{opacity:.4;pointer-events:none}
+.ibtn{width:32px;height:32px;display:inline-grid;place-items:center;border-radius:9px;color:var(--mut);border:1px solid transparent;transition:.15s}
+.ibtn:hover{color:var(--tx);background:var(--card2);border-color:var(--line)}
+.ibtn.danger:hover{color:#f87171}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:99px;background:var(--card2);border:1px solid var(--line);font-size:12px;color:var(--tx);white-space:nowrap;transition:.15s}
+button.chip:hover{border-color:var(--line2)}
+.chip.on{background:rgba(45,212,191,.12);border-color:rgba(45,212,191,.5);color:var(--a)}
+.chip small{color:var(--mut);font-size:11px}
+.chip .x{opacity:.6;margin-right:-4px}.chip .x:hover{opacity:1}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.sbox{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px;border-radius:10px;background:rgba(0,0,0,.25);border:1px solid var(--line);color:var(--mut);min-width:0}
+.sbox:focus-within{border-color:rgba(45,212,191,.5)}
+.sbox input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--tx)}
+select,.date{height:34px;padding:0 10px;border-radius:10px;background:rgba(0,0,0,.25);border:1px solid var(--line);outline:0;color-scheme:dark}
+select option{background:#11141b}
+
+/* home */
+.home{min-height:100vh;display:grid;place-items:center;padding:40px 18px}
+.home-in{width:100%;max-width:620px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.01em;margin-bottom:34px}
+.home h1{font-size:clamp(30px,6vw,46px);line-height:1.05;letter-spacing:-.035em;font-weight:750}
+.home .sub{color:var(--mut);margin:14px 0 26px;font-size:14.5px;max-width:520px}
+.drop{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:34px 20px;border-radius:18px;border:1.5px dashed var(--line2);background:rgba(255,255,255,.025);cursor:pointer;transition:.2s}
+.drop:hover,.drop.over{border-color:var(--a);background:rgba(45,212,191,.05)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop .ic{width:28px;height:28px;color:var(--a);margin-bottom:6px}
+.drop b{font-size:15px}.drop span{color:var(--mut);font-size:12.5px}
+.how{margin-top:12px;color:var(--dim);font-size:12px}
+.saved{margin-top:30px;display:grid;gap:8px}
+.sv{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.sv .av{width:34px;height:34px;border-radius:10px;background:var(--grad);display:grid;place-items:center;color:#06080c;font-weight:700}
+.sv .t{flex:1;min-width:0}.sv .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv .t span{font-size:12px;color:var(--mut)}
+
+/* app shell */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;background:rgba(7,9,13,.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.top-l{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.ttl{font-weight:650;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tsub{font-size:11.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tabs{display:flex;gap:2px;padding:3px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.tabs button{display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;color:var(--mut);font-size:12.5px;font-weight:500;transition:.15s}
+.tabs button:hover{color:var(--tx)}
+.tabs button.on{background:rgba(255,255,255,.09);color:var(--tx);box-shadow:inset 0 0 0 1px var(--line2)}
+.top-r{display:flex;gap:2px;flex:1;justify-content:flex-end}
+main{max-width:1240px;margin:0 auto;padding:16px}
+.view{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}}
+.g{display:grid;gap:12px;align-items:start;grid-template-columns:repeat(12,minmax(0,1fr))}
+.s3{grid-column:span 3}.s4{grid-column:span 4}.s5{grid-column:span 5}.s6{grid-column:span 6}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:span 12}
+.row-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+
+/* overview */
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.kpi{padding:14px}
+.kpi .v{font-size:23px;font-weight:700;letter-spacing:-.03em;line-height:1.15}
+.kpi .l{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+.kpi .d{font-size:11.5px;color:var(--dim);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vs-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:14px}
+.who{display:flex;align-items:center;gap:9px;min-width:0}
+.who.r{justify-content:flex-end;text-align:right}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#06080c;flex:none}
+.who b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.who small{color:var(--mut);font-size:11.5px}
+.vs-x{font-size:11px;color:var(--dim);font-weight:700;letter-spacing:.1em}
+.vs-row{display:grid;grid-template-columns:70px 1fr 70px;align-items:center;gap:10px;padding:6px 0;border-top:1px solid rgba(255,255,255,.04)}
+.vs-row:first-of-type{border-top:0}
+.vs-n{font-weight:600;font-variant-numeric:tabular-nums;font-size:13px}.vs-n.b{text-align:right}
+.vs-l{font-size:11.5px;color:var(--mut);text-align:center;margin-bottom:4px}
+.bar{display:flex;height:6px;border-radius:9px;overflow:hidden;background:rgba(255,255,255,.05);gap:2px}
+.bar i{display:block;height:100%;border-radius:9px;min-width:2px;transition:width .5s}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fact{padding:10px 12px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.fact b{display:block;font-size:14px;letter-spacing:-.01em}.fact span{font-size:11.5px;color:var(--mut)}
+.chart{width:100%;display:block;overflow:visible}
+.chart text{fill:var(--dim);font-size:10px}
+.wd{display:grid;gap:6px}
+.wd-r{display:grid;grid-template-columns:30px 1fr 44px;gap:8px;align-items:center;font-size:12px}
+.wd-r .bar{height:8px}
+.words{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.emo{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.emo span{display:inline-flex;flex-direction:column;align-items:center;font-size:20px;line-height:1.1;min-width:34px}
+.emo small{font-size:10.5px;color:var(--mut)}
+.days{display:grid;gap:4px}
+.day-r{display:grid;grid-template-columns:22px 128px 1fr 48px;gap:10px;align-items:center;padding:7px 8px;border-radius:9px;text-align:left;transition:.15s;width:100%}
+.day-r:hover{background:rgba(255,255,255,.04)}
+.day-r .rk{color:var(--dim);font-size:11.5px}.day-r .dt b{display:block;font-size:12.5px}.day-r .dt small{color:var(--mut);font-size:11px}
+.day-r .c{text-align:right;font-weight:600}
+.day-r .pv{font-size:11.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
+
+/* timeline */
+.tl-chart{overflow-x:auto;padding-bottom:4px}
+.tl{position:relative;padding-left:22px}
+.tl::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--a),var(--b));opacity:.35;border-radius:2px}
+.tl-item{position:relative;margin-bottom:10px;scroll-margin-top:80px}
+.tl-item::before{content:"";position:absolute;left:-21px;top:16px;width:10px;height:10px;border-radius:50%;background:var(--bg);border:2px solid var(--a);box-shadow:0 0 10px rgba(45,212,191,.5)}
+.tl-item.hot::before{border-color:#fbbf24;box-shadow:0 0 12px rgba(251,191,36,.6)}
+.tl-item.flash .card{border-color:var(--a)}
+.tl-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.tl-h b{font-size:15px;letter-spacing:-.01em}
+.tl-h .sp{flex:1}
+.tl-q{margin-top:10px;padding-left:10px;border-left:2px solid var(--line2);color:#c9cedb;font-size:12.5px}
+.tl-q small{display:block;color:var(--dim);margin-top:2px}
+.tl-m{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.tl-m button{width:54px;height:54px;border-radius:9px;overflow:hidden;background:rgba(255,255,255,.04);border:1px solid var(--line);display:grid;place-items:center;color:var(--mut)}
+.tl-m img,.tl-m video{width:100%;height:100%;object-fit:cover;display:block}
+.tl-gap{margin:4px 0 14px -16px;padding:4px 10px;font-size:11.5px;color:var(--dim);font-style:italic}
+
+/* calendar */
+.hm-wrap{overflow-x:auto;padding-bottom:4px}
+.hm rect{rx:2.5;transition:.1s;cursor:pointer}
+.hm rect:hover{stroke:#fff;stroke-width:1}
+.legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);margin-top:10px;flex-wrap:wrap}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.mcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.mcal .wh{font-size:10.5px;color:var(--dim);text-align:center;text-transform:uppercase;letter-spacing:.06em;padding-bottom:2px}
+.mc{position:relative;aspect-ratio:1.35/1;border-radius:10px;padding:6px;background:rgba(255,255,255,.025);border:1px solid var(--line);text-align:left;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transition:.15s;min-width:0}
+.mc.e{background:none;border-color:transparent;pointer-events:none}
+.mc.has:hover{border-color:var(--line2);transform:translateY(-1px)}
+.mc .dn{font-size:11.5px;color:var(--mut);position:relative}
+.mc .ct{font-size:15px;font-weight:700;position:relative;letter-spacing:-.02em}
+.mc .bg{position:absolute;inset:0;opacity:.0}
+.mc .bar{height:4px;position:relative}
+.mc.none .dn{color:var(--dim)}
+@media (max-width:720px){.hide-s{display:none}}
+
+/* chat */
+.ctools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px}
+.ctools .sbox{flex:1;min-width:180px}
+.cscroll{position:relative;height:calc(100vh - 170px);height:calc(100dvh - 170px);overflow-y:auto;overflow-anchor:none;padding:8px 6px 20px;border-radius:var(--r);border:1px solid var(--line);background:rgba(0,0,0,.18)}
+.sent{height:1px}
+.dsep{display:flex;justify-content:center;margin:14px 0 8px;position:sticky;top:4px;z-index:2}
+.dsep span{font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(20,24,32,.9);border:1px solid var(--line);color:var(--mut);backdrop-filter:blur(8px)}
+.msg{display:flex;padding:0 8px;margin-top:6px}
+.msg.cont{margin-top:2px}
+.msg.me{justify-content:flex-end}
+.bub{max-width:min(78%,560px);padding:6px 10px 5px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid var(--line);word-wrap:break-word;overflow-wrap:anywhere;position:relative}
+.msg.them .bub{border-top-left-radius:5px}.msg.them.cont .bub{border-top-left-radius:14px}
+.msg.me .bub{background:linear-gradient(135deg,rgba(45,212,191,.18),rgba(45,212,191,.09));border-color:rgba(45,212,191,.22);border-top-right-radius:5px}
+.msg.me.cont .bub{border-top-right-radius:14px}
+.bub .nm{font-size:11.5px;font-weight:600;margin-bottom:2px}
+.bub .tx{white-space:normal}
+.bub .meta{float:right;margin:6px 0 -2px 10px;font-size:10.5px;color:var(--dim)}
+.bub.del .tx{font-style:italic;color:var(--mut)}
+.flash .bub{animation:flash 1.6s ease}
+@keyframes flash{0%,40%{box-shadow:0 0 0 2px #fbbf24}100%{box-shadow:0 0 0 0 transparent}}
+mark{background:rgba(251,191,36,.35);color:inherit;border-radius:3px;padding:0 1px}
+.bm{display:block;margin:2px -6px 4px;border-radius:10px;overflow:hidden;position:relative;background:rgba(0,0,0,.3);max-width:280px}
+.bm img,.bm video{display:block;width:100%;max-height:300px;min-height:80px;object-fit:cover}
+.play{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.play .ic{width:34px;height:34px;padding:9px;border-radius:50%;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);color:#fff}
+.bfile{display:flex;align-items:center;gap:8px;padding:8px 10px;margin:2px 0 4px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid var(--line);text-align:left;max-width:280px;width:100%}
+.bfile span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px}
+.bfile small{color:var(--mut);font-size:11px}
+.bfile.off{color:var(--mut);border-style:dashed}
+.loc{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid var(--line)}
+.sysm{display:flex;justify-content:center;margin:10px 0}
+.sysm span{font-size:11px;color:var(--dim);max-width:80%;text-align:center}
+
+/* media */
+.mtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px}
+.mtools .sbox{flex:1;min-width:200px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
+.tile{position:relative;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.03);border:1px solid var(--line);cursor:pointer;transition:.15s;aspect-ratio:1;display:flex;flex-direction:column}
+.tile:hover{border-color:var(--line2);transform:translateY(-1px)}
+.tile .th{flex:1;min-height:0;display:grid;place-items:center;position:relative;color:var(--mut)}
+.tile .th img,.tile .th video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tile .th .ic{width:30px;height:30px;stroke-width:1.6}
+.tile .fn{position:absolute;left:8px;right:8px;bottom:28px;font-size:11px;color:var(--mut);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .tcap{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 6px;display:flex;align-items:center;gap:6px;font-size:10.5px;color:#d6dae4;background:linear-gradient(transparent,rgba(0,0,0,.75));pointer-events:none}
+.tile .tcap span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile.doc .tcap,.tile.off .tcap,.tile.contact .tcap,.tile.audio .tcap{background:none}
+.tile.off{border-style:dashed;background:none}
+.tile .ty{position:absolute;top:7px;left:7px;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:6px;background:rgba(0,0,0,.55);color:#cfd4df}
+.tile .tick{position:absolute;top:7px;right:7px;width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(255,255,255,.7);background:rgba(0,0,0,.35);display:none;place-items:center;color:#06080c}
+.tile .tick .ic{width:13px;height:13px;stroke-width:3;opacity:0}
+.selmode .tile:not(.off) .tick{display:grid}
+.tile.sel{border-color:var(--a);box-shadow:0 0 0 2px rgba(45,212,191,.5)}
+.tile.sel .tick{background:var(--a);border-color:var(--a)}.tile.sel .tick .ic{opacity:1}
+.selmode .tile.off{opacity:.35;cursor:not-allowed}
+.selbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 14px;border-radius:14px;background:rgba(18,22,30,.92);border:1px solid var(--line2);backdrop-filter:blur(14px);box-shadow:0 10px 40px rgba(0,0,0,.5);white-space:nowrap;max-width:calc(100vw - 20px)}
+.selbar b{font-size:13px}
+.empty{padding:40px 10px;text-align:center;color:var(--mut)}
+
+/* overlays */
+.ov{position:fixed;inset:0;z-index:50;background:rgba(4,5,8,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;animation:fade .2s}
+.modal{width:100%;max-width:420px;background:#0f1218;border:1px solid var(--line2);border-radius:18px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal h2{font-size:18px;letter-spacing:-.02em;margin-bottom:4px}
+.modal p{color:var(--mut);font-size:13px;margin-bottom:14px}
+.modal .opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.03);text-align:left;transition:.15s}
+.opt:hover{border-color:var(--a);background:rgba(45,212,191,.06)}
+.opt b{flex:1}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.drawer{position:fixed;top:0;right:0;bottom:0;z-index:45;width:min(460px,100vw);background:#0c0f14;border-left:1px solid var(--line2);display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,.5);animation:slide .25s ease}
+@keyframes slide{from{transform:translateX(30px);opacity:0}}
+.drawer .dh{display:flex;align-items:center;gap:10px;padding:14px 14px 12px;border-bottom:1px solid var(--line)}
+.drawer .dh div{flex:1}.drawer .dh b{font-size:15px}
+.drawer .db{flex:1;overflow-y:auto;padding:6px 0 20px}
+.scrim{position:fixed;inset:0;z-index:44;background:rgba(0,0,0,.45)}
+.lb{position:fixed;inset:0;z-index:60;background:rgba(5,6,9,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:grid;grid-template-columns:minmax(0,1fr) 370px;animation:fade .2s}
+.lb-main{position:relative;display:grid;place-items:center;padding:56px 60px;min-height:0;min-width:0}
+.lb-main img,.lb-main video{max-width:100%;max-height:calc(100vh - 112px);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.lb-main audio{width:min(420px,100%)}
+.lb-main video{min-width:min(520px,100%)}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid var(--line);display:grid;place-items:center}
+.lb-nav:hover{background:rgba(255,255,255,.16)}
+.lb-nav.l{left:12px}.lb-nav.r{right:12px}
+.lb-close{position:absolute;top:12px;right:12px}
+.lb-count{position:absolute;top:18px;left:18px;font-size:12px;color:var(--mut)}
+.lb-side{border-left:1px solid var(--line);background:rgba(12,15,20,.9);overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:16px}
+.lb-name{font-size:12px;color:var(--mut);word-break:break-all}
+.lb-cap{font-size:14px;padding:10px 12px;border-radius:12px;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.2)}
+.ctx{display:grid;gap:4px}
+.cx{font-size:12.5px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);max-width:92%}
+.cx.me{justify-self:end;background:rgba(45,212,191,.08);border-color:rgba(45,212,191,.18)}
+.cx small{display:block;font-size:10.5px;color:var(--dim)}
+.cx-here{justify-self:center;font-size:11px;color:var(--a);padding:2px 10px;border-radius:99px;border:1px dashed rgba(45,212,191,.5);margin:2px 0}
+.lb-side textarea{width:100%;min-height:74px;resize:vertical;padding:9px 10px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid var(--line);outline:0}
+.lb-side textarea:focus,.tagin:focus{border-color:rgba(45,212,191,.5)}
+.tagin{width:100%;height:32px;margin-top:8px;padding:0 10px;border-radius:9px;background:rgba(0,0,0,.3);border:1px solid var(--line);outline:0}
+.lb-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.vcard{display:grid;gap:8px;width:min(380px,100%)}
+.vc{padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--line2)}
+.vc b{font-size:16px;display:block;margin-bottom:6px}.vc div{font-size:13px;color:#c9cedb}
+.docprev{width:min(560px,100%);max-height:70vh;overflow:auto;padding:16px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);white-space:pre-wrap;font:12px/1.5 ui-monospace,Menlo,monospace}
+.bigfile{display:grid;place-items:center;gap:10px;text-align:center;color:var(--mut)}
+.bigfile .ic{width:54px;height:54px;stroke-width:1.4;color:var(--tx)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;padding:9px 14px;border-radius:11px;background:rgba(18,22,30,.95);border:1px solid var(--line2);font-size:12.5px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:fade .2s;max-width:calc(100vw - 30px)}
+.toast.err{border-color:rgba(248,113,113,.6);color:#fecaca}
+.loader{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(4,5,8,.75);backdrop-filter:blur(6px)}
+.loader div{display:flex;flex-direction:column;align-items:center;gap:14px;color:var(--mut)}
+.spin{width:30px;height:30px;border-radius:50%;border:2.5px solid rgba(255,255,255,.1);border-top-color:var(--a);animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.tip{position:fixed;z-index:95;pointer-events:none;padding:6px 9px;border-radius:8px;background:rgba(15,18,24,.96);border:1px solid var(--line2);font-size:11.5px;box-shadow:0 6px 20px rgba(0,0,0,.4);max-width:260px}
+.tip b{display:block}
+
+
+.sov{place-items:start center;padding-top:7vh}
+.spanel{width:min(760px,100%);max-height:84vh;display:flex;flex-direction:column;background:#0e1117;border:1px solid var(--line2);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden}
+.sp-top{padding:12px;border-bottom:1px solid var(--line);display:grid;gap:10px}
+.sp-top .sbox{height:44px;font-size:15px}
+.sp-f{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sp-f select,.sp-f .date{height:30px;font-size:12px;padding:0 8px}
+.sp-res{overflow-y:auto;padding:4px 8px 14px}
+.sp-sec{margin-top:10px}
+.sp-sec h4{padding:0 8px;display:flex;justify-content:space-between;align-items:center}
+.sr{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:8px;border-radius:10px}
+.sr:hover{background:rgba(255,255,255,.05)}
+.sr .th{width:40px;height:40px;border-radius:9px;overflow:hidden;flex:none;background:rgba(255,255,255,.05);display:grid;place-items:center;color:var(--mut)}
+.sr .th img,.sr .th video{width:100%;height:100%;object-fit:cover}
+.sr .b{flex:1;min-width:0}.sr .b div{font-size:13px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.sr .b small{color:var(--dim);font-size:11px}
+.kbd{font-size:10.5px;color:var(--mut);border:1px solid var(--line2);border-radius:5px;padding:0 5px;white-space:nowrap}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.lk{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--card);border:1px solid var(--line);cursor:pointer;transition:.15s;min-width:0}
+.lk:hover{border-color:var(--line2);transform:translateY(-1px)}
+.lk-h{display:flex;align-items:center;gap:10px;min-width:0}
+.lk-ic{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:#06080c;flex:none}
+.lk-h b{display:block;font-size:13px}.lk-h small{display:block;color:var(--mut);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk-h .dt{margin-left:auto;font-size:11px;color:var(--dim);white-space:nowrap}
+.lk-u{font-size:12px;color:#7dd3fc;word-break:break-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lk-c{font-size:12.5px;color:#c9cedb;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.lk-f{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mut);margin-top:auto}
+.lk-f .sp{flex:1}
+.drawer .ta{width:100%;min-height:74px;resize:vertical;padding:9px 10px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid var(--line);outline:0}
+.board{width:100%;border-collapse:collapse;font-size:12.5px}
+.board th{position:sticky;top:0;background:#0d1015;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);text-align:right;padding:6px 8px;white-space:nowrap;user-select:none}
+.board th[data-k]{cursor:pointer}.board th[data-k]:hover{color:var(--tx)}
+.board th:first-child,.board td:first-child{text-align:left}
+.board th.on{color:var(--a)}
+.board td{padding:7px 8px;border-top:1px solid rgba(255,255,255,.04);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.board .pn{display:flex;align-items:center;gap:8px;max-width:220px}.board .pn b{overflow:hidden;text-overflow:ellipsis;font-weight:550}
+.bwrap{overflow:auto;max-height:520px}
+.mx{overflow-x:auto}
+.mx table{border-collapse:separate;border-spacing:3px;font-size:11px}
+.mx td{min-width:38px;height:30px;border-radius:6px;text-align:center;font-variant-numeric:tabular-nums;color:#e9ecf2}
+.mx th{font-weight:500;color:var(--mut);font-size:11px;padding:2px 6px;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.mx th.c{writing-mode:vertical-rl;transform:rotate(180deg);height:96px;text-align:left;vertical-align:bottom}
+.wr{display:grid;grid-template-columns:auto minmax(0,360px);gap:18px;justify-content:center;align-items:start}
+.wr-stage{position:relative;height:min(78vh,860px);aspect-ratio:9/16;border-radius:24px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px var(--line2)}
+.wr-stage canvas{width:100%;height:100%;display:block}
+.wr-tap{position:absolute;top:0;bottom:0;width:42%}.wr-tap.l{left:0}.wr-tap.r{right:0}
+.wr-dots{position:absolute;top:10px;left:12px;right:12px;display:flex;gap:4px;pointer-events:none}
+.wr-dots i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.22)}.wr-dots i.on{background:rgba(255,255,255,.9)}
+.wr-side{display:grid;gap:12px}
+.tg{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px}
+.tg input{display:none}.tg span{width:36px;height:21px;border-radius:21px;background:rgba(255,255,255,.12);position:relative;transition:.2s;flex:none}
+.tg span::after{content:"";position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:.2s}
+.tg input:checked+span{background:var(--a)}.tg input:checked+span::after{left:18px}
+.trend-sum{font-size:12.5px;color:#c9cedb;margin-top:8px}
+.modal .opts{max-height:52vh;overflow-y:auto}
+@media (max-width:1180px){.tabs button .ic{display:none}.tabs button{padding:0 9px}}
+@media (max-width:1000px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.s3,.s4,.s5,.s6,.s7,.s8{grid-column:span 12}.lb{grid-template-columns:1fr;grid-template-rows:auto auto;overflow-y:auto}.lb-main{padding:56px 12px 16px;min-height:52vh}.lb-main img,.lb-main video{max-height:60vh}.lb-side{border-left:0;border-top:1px solid var(--line);overflow:visible}.lb-nav{top:auto;bottom:-6px;transform:none}}
+@media (max-width:720px){
+  main{padding:10px 10px 84px}
+  .top{height:52px;padding:0 10px;backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(7,9,13,.97)}
+  .tabs{position:fixed;left:8px;right:8px;bottom:8px;z-index:25;justify-content:space-around;padding:4px;border-radius:16px;background:rgba(14,17,23,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-color:var(--line2);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  .tabs button{flex-direction:column;gap:2px;height:46px;padding:0 4px;font-size:10px;flex:1}
+  .tabs button .ic{width:18px;height:18px}
+  .top-r{flex:none}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .kpi .v{font-size:20px}
+  .facts,.words{grid-template-columns:1fr}
+  .vs-row{grid-template-columns:54px 1fr 54px}
+  .day-r{grid-template-columns:18px 96px 1fr 38px;gap:8px}
+  .cscroll{height:calc(100dvh - 210px)}
+  .mgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+  .selbar{bottom:72px}
+  .toast{bottom:80px}
+  .mc{aspect-ratio:1/.95}
+  .mc{padding:4px;border-radius:8px}.mc .ct{font-size:12px}.mc .dn{font-size:10px}
+  .bub{max-width:86%}
+}
+
+@media (max-width:720px){
+  .tabs button .ic{display:block}
+  .tabs button{font-size:9.5px;padding:0 1px;letter-spacing:-.01em}
+  .wr{grid-template-columns:1fr}
+  .wr-stage{height:auto;width:100%;max-width:440px;justify-self:center}
+  .lgrid{grid-template-columns:1fr}
+  .sov{padding:8px}
+  .spanel{max-height:calc(100dvh - 16px)}
+}
+</style>
+</head>
+<body>
+
+<div id="home" class="home">
+  <div class="home-in">
+    <div class="brand"><span class="logo"></span>Threadline</div>
+    <h1>Your WhatsApp chat,<br><span class="grad">decoded.</span></h1>
+    <p class="sub">Timeline, calendar, head-to-head stats and a searchable media vault. Everything runs in this browser; nothing is uploaded anywhere.</p>
+    <label id="drop" class="drop">
+      <input id="fileIn" type="file" multiple>
+      <span data-ic="upload"></span>
+      <b>Drop your chat export here</b>
+      <span>The .zip from “Export chat → Include media”, or the .txt with its media files</span>
+    </label>
+    <div class="how">On your phone: open the chat → ⋮ → More → Export chat → Include media</div>
+    <div id="saved" class="saved"></div>
+  </div>
+</div>
+
+<div id="appv" hidden>
+  <header class="top">
+    <div class="top-l"><span class="logo sm"></span><div style="min-width:0"><div id="chatTitle" class="ttl"></div><div id="chatSub" class="tsub"></div></div></div>
+    <nav id="tabs" class="tabs">
+      <button data-tab="overview" data-ic="grid">Overview</button>
+      <button data-tab="timeline" data-ic="activity">Timeline</button>
+      <button data-tab="calendar" data-ic="calendar">Calendar</button>
+      <button data-tab="media" data-ic="image">Media</button>
+      <button data-tab="links" data-ic="link">Links</button>
+      <button data-tab="chat" data-ic="msg">Chat</button>
+      <button data-tab="wrapped" data-ic="smile">Wrapped</button>
+    </nav>
+    <div class="top-r">
+      <button id="btnSearch" class="ibtn" title="Search everything (Ctrl/⌘ K)" data-ic="search"></button>
+      <button id="btnHome" class="ibtn" title="Open another chat" data-ic="upload"></button>
+      <button id="btnForget" class="ibtn danger" title="Forget this chat" data-ic="trash"></button>
+    </div>
+  </header>
+  <main>
+    <section id="v-overview" class="view" hidden></section>
+    <section id="v-timeline" class="view" hidden></section>
+    <section id="v-calendar" class="view" hidden></section>
+    <section id="v-media" class="view" hidden></section>
+    <section id="v-links" class="view" hidden></section>
+    <section id="v-chat" class="view" hidden></section>
+    <section id="v-wrapped" class="view" hidden></section>
+  </main>
+</div>
+
+<div id="lb" class="lb" hidden></div>
+<div id="tip" class="tip" hidden></div>
+
+<script>
+'use strict';
+/* =========================================================
+   Threadline — single-file WhatsApp chat analyzer
+   No dependencies. Data stays in the browser (IndexedDB).
+   ========================================================= */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const reEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const fmtN=n=>Math.round(n).toLocaleString('en-IN');
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONF=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WD=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const WDF=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const HOUR=36e5, DAY=864e5, GAP=6*HOUR;
+const pad=n=>String(n).padStart(2,'0');
+const dayKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const keyDate=k=>{const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
+const fmtDate=d=>`${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`;
+const fmtDateS=d=>`${d.getDate()} ${MON[d.getMonth()]} ’${String(d.getFullYear()).slice(2)}`;
+const fmtTime=d=>{let h=d.getHours();const ap=h<12?'am':'pm';h=h%12||12;return `${h}:${pad(d.getMinutes())} ${ap}`};
+const fmtHour=h=>`${h%12||12}${h<12?'am':'pm'}`;
+const fmtSize=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(0)+' KB':b<1073741824?(b/1048576).toFixed(1)+' MB':(b/1073741824).toFixed(2)+' GB';
+const fmtDur=ms=>{if(ms==null||!isFinite(ms))return '—';const s=ms/1000;if(s<60)return Math.round(s)+'s';if(s<3600)return Math.round(s/60)+'m';if(s<86400)return (s/3600).toFixed(1)+'h';return (s/86400).toFixed(1)+'d'};
+const median=a=>{if(!a.length)return null;const b=[...a].sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+const hashStr=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)};
+const debounce=(f,ms)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>f(...a),ms)}};
+
+/* ---------- icons ---------- */
+const IC={
+grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>',
+activity:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+msg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+left:'<polyline points="15 18 9 12 15 6"/>',right:'<polyline points="9 18 15 12 9 6"/>',
+up:'<polyline points="18 15 12 9 6 15"/>',down:'<polyline points="6 9 12 15 18 9"/>',
+search:'<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+check:'<polyline points="20 6 9 17 4 12"/>',
+play:'<polygon points="7 4 20 12 7 20 7 4"/>',
+file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+film:'<rect x="2" y="2" width="20" height="20" rx="2.5"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/>',
+eyeoff:'<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>',
+card:'<rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8" cy="11" r="2.5"/><path d="M4.5 17c.8-1.8 2-2.6 3.5-2.6s2.7.8 3.5 2.6"/><line x1="14" y1="9" x2="19" y2="9"/><line x1="14" y1="13" x2="18" y2="13"/>',
+smile:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
+tag:'<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+link:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+};
+const ic=(n,c='')=>`<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]||''}</svg>`;
+$$('[data-ic]').forEach(el=>el.insertAdjacentHTML('afterbegin',ic(el.dataset.ic)));
+
+/* ---------- UI helpers ---------- */
+let toastT;
+function toast(msg,err){let t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t)}t.className='toast'+(err?' err':'');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,err?5000:2600)}
+function loader(msg){let l=$('#loader');if(msg===false){l&&l.remove();return}if(!l){l=document.createElement('div');l.id='loader';l.className='loader';l.innerHTML='<div><span class="spin"></span><span class="lm"></span></div>';document.body.appendChild(l)}$('.lm',l).textContent=msg}
+const nextFrame=()=>new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
+function modal(html){const o=document.createElement('div');o.className='ov';o.innerHTML=`<div class="modal">${html}</div>`;document.body.appendChild(o);return o}
+function confirmBox(title,text,okLabel){return new Promise(res=>{const o=modal(`<h2>${esc(title)}</h2><p>${esc(text)}</p><div class="acts"><button class="btn" data-v="0">Cancel</button><button class="btn pri" data-v="1">${esc(okLabel)}</button></div>`);o.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b||e.target===o){o.remove();res(!!(b&&b.dataset.v==='1'))}})})}
+
+/* tooltip (hover devices only) */
+const tip=$('#tip');
+const canHover=matchMedia('(hover:hover)').matches;
+document.addEventListener('mouseover',e=>{if(!canHover)return;const el=e.target.closest('[data-tip]');if(!el){tip.hidden=true;return}tip.innerHTML=el.dataset.tip;tip.hidden=false});
+document.addEventListener('mousemove',e=>{if(tip.hidden)return;const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=x+'px';tip.style.top=y+'px'});
+
+/* ---------- downloads (artifact capability, else <a download>) ---------- */
+let dlNS=null;const inHost=!!(window.claude&&typeof window.claude.use==='function');
+const dlReady=inHost?window.claude.use('downloads').then(n=>{dlNS=n}).catch(()=>{}):Promise.resolve();
+const DL_OK=/\.(gif|png|jpe?g|webp|mp4|webm|mov|txt|json|md|docx|pptx|epub|csv|ttf|html|svg|pdf|xlsx|zip)$/i;
+async function saveBlob(name,blob){
+  if(inHost){await dlReady;if(dlNS){try{await dlNS.save({filename:name,data:blob});toast('Saved '+name)}catch(e){if(e&&e.code==='declined')toast('Download cancelled');else toast('Download failed: '+(e&&e.message||e&&e.code||'unavailable'),true)}return}}
+  const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000);
+}
+
+/* ---------- ZIP read (central directory + DecompressionStream) ---------- */
+async function isZip(f){try{const b=new Uint8Array(await f.slice(0,4).arrayBuffer());return b[0]===0x50&&b[1]===0x4b&&b[2]===3&&b[3]===4}catch{return false}}
+/* Reads only the directory into memory; each entry is a lazy slice of the original File. */
+async function readZip(file){
+  const size=file.size,tl=Math.min(size,65557+22);
+  const tail=new Uint8Array(await file.slice(size-tl).arrayBuffer()),tv=new DataView(tail.buffer);
+  let e=-1;for(let i=tail.length-22;i>=0;i--){if(tv.getUint32(i,true)===0x06054b50){e=i;break}}
+  if(e<0)throw new Error('That zip looks damaged (no directory found).');
+  let cnt=tv.getUint16(e+10,true),cdSize=tv.getUint32(e+12,true),cdOff=tv.getUint32(e+16,true);
+  if(cdOff===0xffffffff||cnt===0xffff||cdSize===0xffffffff){const l=e-20;if(l>=0&&tv.getUint32(l,true)===0x07064b50){const z=Number(tv.getBigUint64(l+8,true));const zv=new DataView(await file.slice(z,z+56).arrayBuffer());if(zv.getUint32(0,true)===0x06064b50){cnt=Number(zv.getBigUint64(32,true));cdSize=Number(zv.getBigUint64(40,true));cdOff=Number(zv.getBigUint64(48,true))}}}
+  const cd=new Uint8Array(await file.slice(cdOff,cdOff+cdSize).arrayBuffer()),dv=new DataView(cd.buffer),td=new TextDecoder(),ents=[];let p=0;
+  for(let k=0;k<cnt&&p+46<=cd.length;k++){
+    if(dv.getUint32(p,true)!==0x02014b50)break;
+    const method=dv.getUint16(p+10,true);let csize=dv.getUint32(p+20,true),usize=dv.getUint32(p+24,true);
+    const nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true);let lho=dv.getUint32(p+42,true);
+    const name=td.decode(cd.subarray(p+46,p+46+nl));
+    if(csize===0xffffffff||usize===0xffffffff||lho===0xffffffff){let q=p+46+nl;const end=q+xl;while(q+4<=end){const id=dv.getUint16(q,true),sz=dv.getUint16(q+2,true);if(id===1){let r=q+4;if(usize===0xffffffff){usize=Number(dv.getBigUint64(r,true));r+=8}if(csize===0xffffffff){csize=Number(dv.getBigUint64(r,true));r+=8}if(lho===0xffffffff)lho=Number(dv.getBigUint64(r,true))}q+=4+sz}}
+    p+=46+nl+xl+cl;
+    if(!name.endsWith('/'))ents.push({name,method,csize,usize,lho});
+  }
+  for(let k=0;k<ents.length;k+=64)await Promise.all(ents.slice(k,k+64).map(async en=>{const h=new DataView(await file.slice(en.lho,en.lho+30).arrayBuffer());en.start=en.lho+30+h.getUint16(26,true)+h.getUint16(28,true)}));
+  return ents.map(en=>({name:en.name,method:en.method,size:en.usize,data:file.slice(en.start,en.start+en.csize)}));
+}
+async function inflate(en,type){
+  if(en.method===0)return en.data.slice(0,en.data.size,type);
+  if(en.method===8){if(typeof DecompressionStream==='undefined')throw new Error('This browser can’t unzip natively. Unzip the export and drop the files instead.');const b=await new Response(en.data.stream().pipeThrough(new DecompressionStream('deflate-raw'))).blob();return b.slice(0,b.size,type)}
+  throw new Error('Unsupported zip compression in '+en.name);
+}
+
+/* ---------- ZIP write (store, UTF-8 names) ---------- */
+const CRCT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u){let c=0xffffffff;for(let i=0;i<u.length;i++)c=CRCT[(c^u[i])&255]^(c>>>8);return (c^0xffffffff)>>>0}
+function dos(d){d=d&&!isNaN(d)?d:new Date();const y=Math.max(1980,d.getFullYear());return{time:(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),date:((y-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate()}}
+async function makeZip(items,onProg){
+  const te=new TextEncoder(),parts=[],cd=[],used=new Set();let off=0;
+  for(let i=0;i<items.length;i++){
+    let name=items[i].name;if(used.has(name)){const m=name.match(/^(.*?)(\.[^.]*)?$/);let k=2;while(used.has(`${m[1]} (${k})${m[2]||''}`))k++;name=`${m[1]} (${k})${m[2]||''}`}used.add(name);
+    const data=new Uint8Array(await items[i].blob.arrayBuffer()),crc=crc32(data),nb=te.encode(name),{time,date}=dos(items[i].date);
+    const lh=new DataView(new ArrayBuffer(30));lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(10,time,true);lh.setUint16(12,date,true);lh.setUint32(14,crc,true);lh.setUint32(18,data.length,true);lh.setUint32(22,data.length,true);lh.setUint16(26,nb.length,true);
+    parts.push(lh.buffer,nb,items[i].blob);
+    const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(12,time,true);ch.setUint16(14,date,true);ch.setUint32(16,crc,true);ch.setUint32(20,data.length,true);ch.setUint32(24,data.length,true);ch.setUint16(28,nb.length,true);ch.setUint32(42,off,true);
+    cd.push(ch.buffer,nb);off+=30+nb.length+data.length;onProg&&onProg(i+1,items.length);
+    if(i%5===4)await nextFrame();
+  }
+  const cdSize=cd.reduce((s,x)=>s+x.byteLength,0),e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,items.length,true);e.setUint16(10,items.length,true);e.setUint32(12,cdSize,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...cd,e.buffer],{type:'application/zip'});
+}
+
+/* ---------- IndexedDB ---------- */
+const DB={p:null,
+  open(){if(!this.p)this.p=new Promise((res,rej)=>{try{const r=indexedDB.open('threadline',1);r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('chats',{keyPath:'id'});d.createObjectStore('files',{keyPath:'key'}).createIndex('chat','chat');d.createObjectStore('notes',{keyPath:'key'}).createIndex('chat','chat')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error('IndexedDB blocked'))}catch(e){rej(e)}});return this.p},
+  async tx(stores,mode,fn){const d=await this.open();return new Promise((res,rej)=>{const t=d.transaction(stores,mode);let out;const r=fn(t);if(r&&'onsuccess' in r)r.onsuccess=()=>{out=r.result};t.oncomplete=()=>res(out);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||new Error('Storage aborted (quota?)'))})},
+  chats(){return this.tx('chats','readonly',t=>t.objectStore('chats').getAll())},
+  chat(id){return this.tx('chats','readonly',t=>t.objectStore('chats').get(id))},
+  putChat(c){return this.tx('chats','readwrite',t=>{t.objectStore('chats').put(c)})},
+  putFiles(id,fmap){return this.tx('files','readwrite',t=>{const s=t.objectStore('files');for(const[name,blob]of fmap)s.put({key:id+'|'+name,chat:id,name,blob})})},
+  files(id){return this.tx('files','readonly',t=>t.objectStore('files').index('chat').getAll(id))},
+  notes(id){return this.tx('notes','readonly',t=>t.objectStore('notes').index('chat').getAll(id))},
+  putNote(n){return this.tx('notes','readwrite',t=>{t.objectStore('notes').put(n)})},
+  del(id){return this.tx(['chats','files','notes'],'readwrite',t=>{t.objectStore('chats').delete(id);for(const st of['files','notes']){const s=t.objectStore(st),r=s.index('chat').openKeyCursor(IDBKeyRange.only(id));r.onsuccess=()=>{const c=r.result;if(c){s.delete(c.primaryKey);c.continue()}}}})}
+};
+
+/* ---------- core: parsing + stats (also runs inside a Web Worker) ---------- */
+function CORE(){
+const pad=n=>String(n).padStart(2,'0'),dayKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,keyDate=k=>{const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)},HOUR=36e5,DAY=864e5,GAP=6*HOUR;
+const SP='[\\s\\u202f\\u00a0]';
+const RE_AND=new RegExp(`^[\\u200e\\u200f]?(\\d{1,4})[\\/.\\-](\\d{1,2})[\\/.\\-](\\d{1,4}),?${SP}+(\\d{1,2})[:.](\\d{2})(?:[:.](\\d{2}))?${SP}*([aApP]\\.?${SP}?[mM]\\.?)?${SP}*[-–]${SP}(.*)$`);
+const RE_IOS=new RegExp(`^[\\u200e\\u200f]?\\[(\\d{1,4})[\\/.\\-](\\d{1,2})[\\/.\\-](\\d{1,4}),?${SP}+(\\d{1,2})[:.](\\d{2})(?:[:.](\\d{2}))?${SP}*([aApP]\\.?${SP}?[mM]\\.?)?\\]${SP}?(.*)$`);
+const URL_G=/https?:\/\/[^\s<>"]+/g;
+const EMO=/\p{Extended_Pictographic}(?:️|[\u{1F3FB}-\u{1F3FF}])?(?:‍\p{Extended_Pictographic}(?:️|[\u{1F3FB}-\u{1F3FF}])?)*/gu;
+const LAUGH=/(?:\b(?:ha){2,}|\bhehe|\blol\b|\blmao|\brofl|😂|🤣|😆)/i;
+const OMIT=/^<?\s*(media|image|video|audio|sticker|gif|document|contact card|view once (?:photo|video|voice message))\s+omitted\s*>?$/i;
+const ATT_WORDS=/file attached|archivo adjunto|fichier joint|datei angehängt|arquivo anexado|file allegato|terlampir|dosya ekli|bestand bijgevoegd/i;
+const SYS=/end-to-end encrypted|security code (?:with|changed)|disappearing messages|is a contact\.?$|changed (?:the|this) group|created group|joined using this group|changed their phone number/i;
+const STOP=new Set(('the and you for that this with have are was but not your all can just get what when out how its it\'s i\'m dont don\'t too will one yes yeah yea yep okay ohk okk any some they them then than there their here from also about would could should into been did does doing done had has him her his she our ours who why where which very much more most only even still well really thing things got going gonna wanna want know like make made take see say said let now new good fine sure ok bro dude man hey hii hello thanks thank thx pls plz please sorry haha hahaha lol hmm hmmm umm uhh ohh ahh yup nope sir bhai bhaiya yaar yr re ' +
+ 'hai hain hoon hun hua hui hue hoga hogi hoge hota hoti hote tha thi the nahi nhi nahin kya kyu kyun kyon haan han toh bhi aur aap app tum tumlog humlog hum mai main mein mera meri mere tera teri tere apna apni apne uska uski uske iska iski iske unka inka usko isko unko inko mujhe mujhko tujhe tujhko kuch sab kab kaha kahan jab tab abhi phir fir lagta lga lgta diya liya dena lena karna krna karo kro kar raha rha rahi rhi rahe rhe rahega wala wali wale bata bta batao bolo bol bola matlab acha accha achha theek thik sahi ekdum woh yeh isme usme tak par pass paas aaj kal kab bas ' +
+ 'media omitted attached file message deleted edited http https www com null').split(/\s+/));
+function tokens(t){return (t||'').replace(URL_G,' ').toLowerCase().match(/[\p{L}][\p{L}\p{M}']+/gu)?.filter(w=>w.length>=3&&!STOP.has(w))||[]}
+const EXT={image:/^(jpe?g|png|gif|webp|heic|heif|bmp)$/,video:/^(mp4|mov|3gp|mkv|webm|avi|m4v)$/,audio:/^(opus|ogg|m4a|mp3|aac|wav|amr|oga)$/,contact:/^vcf$/};
+const MIME={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',heic:'image/heic',bmp:'image/bmp',mp4:'video/mp4',m4v:'video/mp4',mov:'video/quicktime','3gp':'video/3gpp',webm:'video/webm',mkv:'video/x-matroska',opus:'audio/ogg',ogg:'audio/ogg',oga:'audio/ogg',m4a:'audio/mp4',mp3:'audio/mpeg',aac:'audio/aac',wav:'audio/wav',amr:'audio/amr',pdf:'application/pdf',vcf:'text/vcard',txt:'text/plain',csv:'text/csv',json:'application/json'};
+const extOf=n=>(n.match(/\.([^.]+)$/)||[,''])[1].toLowerCase();
+const mimeOf=n=>MIME[extOf(n)]||'application/octet-stream';
+function typeOf(name){const e=extOf(name);if(/^STK-/i.test(name)&&e==='webp')return'sticker';if(/^PTT-/i.test(name))return'audio';for(const k in EXT)if(EXT[k].test(e))return k;return'doc'}
+const OMIT_TYPE={media:'media',image:'image',video:'video',audio:'audio',sticker:'sticker',gif:'image',document:'doc','contact card':'contact'};
+const TYPE_LABEL={image:'Photo',video:'Video',audio:'Audio',sticker:'Sticker',doc:'Document',contact:'Contact',media:'Media'};
+const TYPE_PL={image:'Photos',video:'Videos',audio:'Audio',sticker:'Stickers',doc:'Documents',contact:'Contacts'};
+const TYPE_IC={image:'image',video:'film',audio:'music',sticker:'smile',doc:'file',contact:'card',media:'image'};
+
+function parseChat(text,fileSet,onProg){
+  text=text.replace(/^﻿/,'').replace(/\r\n?/g,'\n');
+  const raw=[];let cur=null;
+  const lines=text.split('\n');
+  for(let li=0;li<lines.length;li++){const ln=lines[li];if(onProg&&li%25000===0)onProg(li,lines.length);
+    const m=RE_AND.exec(ln)||RE_IOS.exec(ln);
+    if(m){cur={a:m[1],b:m[2],c:m[3],h:+m[4],mi:+m[5],s:+(m[6]||0),ap:(m[7]||'').toLowerCase().replace(/[^ap]/g,''),rest:m[8]};raw.push(cur)}
+    else if(cur)cur.rest+='\n'+ln;
+  }
+  const mk=(r,o)=>{let y,mo,d;if(o==='ymd'){y=+r.a;mo=+r.b;d=+r.c}else if(o==='dmy'){d=+r.a;mo=+r.b;y=+r.c}else{mo=+r.a;d=+r.b;y=+r.c}if(y<100)y+=2000;let h=r.h;if(r.ap==='p'&&h<12)h+=12;if(r.ap==='a'&&h===12)h=0;return new Date(y,mo-1,d,h,r.mi,r.s).getTime()};
+  let order='dmy';
+  if(raw.some(r=>r.a.length===4))order='ymd';
+  else if(raw.some(r=>+r.a>12))order='dmy';
+  else if(raw.some(r=>+r.b>12))order='mdy';
+  else{const inv=o=>{let c=0,p=0;for(const r of raw){const t=mk(r,o);if(t<p)c++;p=t}return c};order=inv('mdy')<inv('dmy')?'mdy':'dmy'}
+  const senders=[],sIdx=new Map(),msgs=[];
+  for(const r of raw){
+    const t=mk(r,order),d=new Date(t);let rest=r.rest,sender=null,body=rest;
+    const ci=rest.indexOf(': ');
+    if(ci>0&&ci<80&&!rest.slice(0,ci).includes('\n')){sender=rest.slice(0,ci).replace(/[‎‏‪-‮]/g,'').replace(/^~\s?/,'').trim();body=rest.slice(ci+2)}
+    body=body.replace(/^[‎‏]+/,'');
+    const m={i:msgs.length,t,day:dayKey(d),s:-1,type:'text',text:body,media:null,edited:false,loc:null};
+    if(!sender||(SYS.test(body)&&body.length<400)){m.type='system';msgs.push(m);continue}
+    if(!sIdx.has(sender)){sIdx.set(sender,senders.length);senders.push(sender)}
+    m.s=sIdx.get(sender);
+    if(/\s*[‎]?<This message was edited>$/.test(m.text)){m.edited=true;m.text=m.text.replace(/\s*[‎]?<This message was edited>$/,'')}
+    const first=m.text.split('\n')[0];let am;
+    if(/^(This message was deleted|You deleted this message)\.?$/.test(m.text.trim())){m.type='deleted'}
+    else if((am=/^(.+\.[A-Za-z0-9]{2,5})(?:\s•.*?)?\s\(([^()]{3,40})\)$/.exec(first))&&(ATT_WORDS.test(am[2])||fileSet.has(am[1]))){
+      m.type='media';m.att=am[1].replace(/[‎]/g,'').trim();m.text=m.text.slice(first.length+1).trim();
+    }
+    else if((am=/<attached:\s*([^>]+)>/.exec(m.text))){m.type='media';m.att=am[1].trim();m.text=m.text.replace(am[0],'').replace(/^[‎\s]+/,'').trim()}
+    else if((am=OMIT.exec(m.text.trim()))){m.type='omitted';m.okind=OMIT_TYPE[am[1].toLowerCase()]||'media';m.text=''}
+    const lm=/^location:\s*(https?:\/\/\S+)/i.exec(m.text);if(lm)m.loc=lm[1];
+    msgs.push(m);
+  }
+  return{msgs,senders,order};
+}
+
+function attachMedia(C){
+  const media=[],used=new Set();
+  for(const m of C.msgs){
+    if(m.type==='media'){
+      let name=m.att;if(!C.files.has(name)){const alt=name.replace(/\s•.*$/,'');if(C.files.has(alt))name=alt}
+      const f=C.files.get(name);used.add(name);
+      m.media=media.length;media.push({id:media.length,mi:m.i,name,type:typeOf(name),s:m.s,t:m.t,caption:m.text,file:f||null,status:f?'ok':'missing'});
+    }else if(m.type==='omitted'){m.media=media.length;media.push({id:media.length,mi:m.i,name:null,type:m.okind,s:m.s,t:m.t,caption:'',file:null,status:'omitted'})}
+  }
+  for(const[name,f]of C.files){if(used.has(name))continue;const dm=name.match(/(20\d{2})(\d{2})(\d{2})/);const t=dm?new Date(+dm[1],+dm[2]-1,+dm[3]).getTime():0;media.push({id:media.length,mi:-1,name,type:typeOf(name),s:-1,t,caption:'',file:f,status:'ok',orphan:true})}
+  C.media=media;
+}
+
+function computeStats(C){
+  const nS=C.senders.length;
+  const per=C.senders.map(()=>({msgs:0,textMsgs:0,words:0,media:0,links:0,starts:0,replies:[],turns:0,night:0,q:0,laugh:0,del:0,edit:0,emo:new Map(),wmap:new Map(),hours:Array(24).fill(0),wd:Array(7).fill(0),longest:{w:0,i:-1}}));
+  const mat=C.senders.map(()=>Array(nS).fill(0));
+  const days=new Map(),months=new Map();let prev=null,total=0;
+  const inc=(m,k,v=1)=>m.set(k,(m.get(k)||0)+v);
+  for(const m of C.msgs){
+    if(m.type==='system')continue;total++;
+    const p=per[m.s];p.msgs++;
+    const mk=m.day.slice(0,7);let mo=months.get(mk);if(!mo){mo={key:mk,n:0,per:Array(nS).fill(0),starts:Array(nS).fill(0),rep:C.senders.map(()=>[]),wc:Array(nS).fill(0),tm:Array(nS).fill(0),first:m.i,days:new Set(),words:new Map(),best:{w:0,i:-1},media:[]};months.set(mk,mo)}mo.n++;mo.per[m.s]++;mo.days.add(m.day);
+    const gap=prev?m.t-prev.t:Infinity;
+    if(gap>=GAP){p.starts++;mo.starts[m.s]++}else if(prev.s!==m.s){p.replies.push(gap);mo.rep[m.s].push(gap);mat[m.s][prev.s]++}
+    if(!prev||prev.s!==m.s||gap>=GAP)p.turns++;
+    prev=m;
+    const d=new Date(m.t),h=d.getHours();p.hours[h]++;p.wd[(d.getDay()+6)%7]++;if(h<5)p.night++;
+    let dd=days.get(m.day);if(!dd){dd={n:0,per:Array(nS).fill(0),first:m.i,last:m.i};days.set(m.day,dd)}dd.n++;dd.per[m.s]++;dd.last=m.i;
+    if(m.media!=null){p.media++;mo.media.push(m.media)}
+    if(m.type==='deleted'){p.del++;continue}
+    if(m.edited)p.edit++;
+    const txt=m.text;if(!txt||m.loc)continue;
+    const wc=txt.split(/\s+/).filter(Boolean).length;p.textMsgs++;p.words+=wc;mo.wc[m.s]+=wc;mo.tm[m.s]++;
+    if(wc>p.longest.w)p.longest={w:wc,i:m.i};if(wc>mo.best.w)mo.best={w:wc,i:m.i};
+    p.links+=(txt.match(URL_G)||[]).length;
+    for(const e of txt.matchAll(EMO))inc(p.emo,e[0]);
+    for(const w of tokens(txt)){inc(p.wmap,w);inc(mo.words,w)}
+    if(/\?\s*$/.test(txt))p.q++;if(LAUGH.test(txt))p.laugh++;
+  }
+  const dayKeys=[...days.keys()].sort();
+  let streak={len:0},silence={len:0},run=1,runStart=dayKeys[0];
+  for(let i=0;i<dayKeys.length;i++){
+    if(i>0){const diff=Math.round((keyDate(dayKeys[i])-keyDate(dayKeys[i-1]))/DAY);if(diff===1)run++;else{run=1;runStart=dayKeys[i]}if(diff-1>silence.len)silence={len:diff-1,from:dayKeys[i-1],to:dayKeys[i]}}
+    if(run>streak.len)streak={len:run,from:runStart,to:dayKeys[i]};
+  }
+  const top=[...days].sort((a,b)=>b[1].n-a[1].n).slice(0,10);
+  const hours=Array(24).fill(0),wd=Array(7).fill(0);per.forEach(p=>{p.hours.forEach((v,i)=>hours[i]+=v);p.wd.forEach((v,i)=>wd[i]+=v)});
+  let first,last;for(const m of C.msgs)if(m.type!=='system'){first=m.t;break}for(let i=C.msgs.length-1;i>=0;i--)if(C.msgs[i].type!=='system'){last=C.msgs[i].t;break}
+  return{per,total,days,months,dayKeys,streak,silence,top,hours,wd,first,last,mat};
+}
+return{URL_G,EMO,STOP,tokens,EXT,MIME,extOf,mimeOf,typeOf,TYPE_LABEL,TYPE_PL,TYPE_IC,OMIT_TYPE,parseChat,attachMedia,computeStats};
+}
+const CORE_API=CORE();
+const{URL_G,EMO,STOP,tokens,extOf,mimeOf,typeOf,TYPE_LABEL,TYPE_PL,TYPE_IC,parseChat,attachMedia,computeStats}=CORE_API;
+/* Parse + stats in a Web Worker so the page stays responsive; falls back to the main thread. */
+function runCore(text,names,onProg){
+  const local=()=>{const P=parseChat(text,new Set(names));const C={files:new Map(names.map(n=>[n,true])),...P};attachMedia(C);const stats=computeStats(C);delete C.files;return{C,stats}};
+  return new Promise(res=>{
+    let w,url;
+    try{url=URL.createObjectURL(new Blob([`const core=(${CORE.toString()})();onmessage=e=>{try{const{text,names}=e.data;const P=core.parseChat(text,new Set(names),(a,b)=>postMessage({prog:a,of:b}));postMessage({prog:-1});const C={files:new Map(names.map(n=>[n,true])),...P};core.attachMedia(C);const stats=core.computeStats(C);delete C.files;postMessage({C,stats})}catch(err){postMessage({err:String(err&&err.stack||err)})}}`],{type:'text/javascript'}));w=new Worker(url)}
+    catch(e){console.warn('Worker unavailable, parsing on main thread',e);return res(local())}
+    const done=r=>{try{w.terminate()}catch{}URL.revokeObjectURL(url);res(r)};
+    w.onmessage=e=>{const d=e.data;if(d.prog!=null){onProg&&onProg(d.prog,d.of);return}if(d.err){console.warn(d.err);done(local())}else done(d)};
+    w.onerror=ev=>{ev.preventDefault();console.warn('Worker error',ev.message);done(local())};
+    w.postMessage({text,names});
+  });
+}
+
+function ctxAround(C,mi,t,n){const msgs=C.msgs,ctx={before:[],after:[]};if(mi<0)return ctx;
+  for(let j=mi-1;j>=0&&ctx.before.length<n;j--){const m=msgs[j];if(m.type==='system')continue;if(t-m.t>DAY)break;if(m.text&&m.type!=='media')ctx.before.unshift(j)}
+  for(let j=mi+1;j<msgs.length&&ctx.after.length<n;j++){const m=msgs[j];if(m.type==='system')continue;if(m.t-t>DAY)break;if(m.text&&m.type!=='media')ctx.after.push(j)}
+  return ctx}
+function dateWords(t){if(!t)return '';const d=new Date(t);return `${d.getDate()} ${MON[d.getMonth()]} ${MONF[d.getMonth()]} ${d.getFullYear()} ${WDF[d.getDay()]}`}
+function buildContext(C){
+  const msgs=C.msgs;
+  for(const md of C.media){
+    md.mk=md.name||('omit-'+md.mi);
+    const ctx=md.ctx=ctxAround(C,md.mi,md.t,3);
+    const sc=new Map(),add=(t,w)=>{for(const k of tokens(t))sc.set(k,(sc.get(k)||0)+w)};
+    add(md.caption,3);ctx.before.forEach((j,k)=>add(msgs[j].text,k===ctx.before.length-1?2:1));ctx.after.forEach((j,k)=>add(msgs[j].text,k===0?2:1));
+    md.kw=[...sc].sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]);
+    const near=[...ctx.before,...ctx.after].map(j=>msgs[j]);md.auto=[];
+    if(near.some(m=>m.loc))md.auto.push('location');
+    for(const m of near)for(const u of(m.text.match(URL_G)||[])){try{const h=new URL(u).hostname.replace(/^www\./,'');if(!md.auto.includes(h))md.auto.push(h)}catch{}}
+    md.base=[md.name||'',md.caption,C.senders[md.s]||'',dateWords(md.t),md.type,TYPE_LABEL[md.type]||'',md.status==='ok'?'':'omitted missing',...md.kw,...md.auto,...near.map(m=>m.text)].join(' ').toLowerCase();
+  }
+  C.media.filter(m=>m.type==='contact'&&m.file).forEach(async m=>{try{m.vcf=parseVcf(await m.file.text());m.base+=' '+m.vcf.map(c=>[c.name,...c.tels,...c.emails,c.org].join(' ')).join(' ').toLowerCase()}catch{}});
+  buildLinks(C);
+}
+const LINK_KINDS={youtube:['YouTube','#f87171','film'],maps:['Maps','#34d399','pin'],instagram:['Instagram','#f472b6','image'],spotify:['Spotify','#4ade80','music'],x:['X / Twitter','#e5e7eb','msg'],linkedin:['LinkedIn','#60a5fa','user'],reddit:['Reddit','#fb923c','msg'],shop:['Shopping','#fbbf24','tag'],github:['GitHub','#c4b5fd','file'],gdrive:['Google Drive','#facc15','file'],places:['Places','#2dd4bf','pin'],web:['Web','#94a3b8','link']};
+function linkKind(h,p){
+  if(/(^|\.)youtube\.com$|^youtu\.be$/.test(h))return'youtube';
+  if(h==='maps.app.goo.gl'||/^maps\.google\./.test(h)||(/(^|\.)google\.[a-z.]+$/.test(h)&&p.startsWith('/maps'))||(h==='goo.gl'&&p.startsWith('/maps')))return'maps';
+  if(/(^|\.)instagram\.com$|^instagr\.am$/.test(h))return'instagram';
+  if(/(^|\.)spotify\.com$|^spotify\.link$/.test(h))return'spotify';
+  if(/(^|\.)(twitter|x)\.com$|^t\.co$/.test(h))return'x';
+  if(/(^|\.)linkedin\.com$|^lnkd\.in$/.test(h))return'linkedin';
+  if(/(^|\.)reddit\.com$|^redd\.it$/.test(h))return'reddit';
+  if(/(^|\.)(amazon\.[a-z.]+|amzn\.(to|in|eu)|flipkart\.com|myntra\.com|meesho\.com|ajio\.com)$/.test(h))return'shop';
+  if(/(^|\.)github\.com$/.test(h))return'github';
+  if(/^(docs|drive)\.google\.com$/.test(h))return'gdrive';
+  if(/(^|\.)(foursquare\.com|zomato\.com|swiggy\.com|tripadvisor\.[a-z.]+|booking\.com|airbnb\.[a-z.]+)$/.test(h))return'places';
+  return'web';
+}
+function buildLinks(C){
+  const L=[];
+  for(const m of C.msgs){if(m.type==='system'||!m.text)continue;const us=m.text.match(URL_G);if(!us)continue;
+    const own=m.text.replace(URL_G,' ').replace(/^location:\s*/i,'').replace(/\s+/g,' ').trim();
+    us.forEach((raw,k)=>{const url=raw.replace(/[).,!?;:'"\]]+$/,'');let u;try{u=new URL(url)}catch{return}
+      const host=u.hostname.replace(/^www\./,''),kind=linkKind(host,u.pathname);
+      const it={id:L.length,mi:m.i,k,url,host,kind,s:m.s,t:m.t,day:m.day,mk:`link:${m.i}:${k}`,own};
+      it.ctx=ctxAround(C,m.i,m.t,2);
+      it.base=[url,host,LINK_KINDS[kind][0],own,C.senders[m.s]||'',dateWords(m.t),...[...it.ctx.before,...it.ctx.after].map(j=>C.msgs[j].text)].join(' ').toLowerCase();
+      L.push(it)})}
+  C.links=L;
+}
+function parseVcf(t){
+  t=t.replace(/\r\n[ \t]/g,'').replace(/\r/g,'');
+  return t.split(/BEGIN:VCARD/i).slice(1).map(b=>{const c={name:'',tels:[],emails:[],org:''};for(const l of b.split('\n')){const i=l.indexOf(':');if(i<0)continue;const k=l.slice(0,i).toUpperCase(),v=l.slice(i+1).trim();if(k.startsWith('FN'))c.name=v;else if(k.startsWith('TEL')||k.includes('.TEL'))c.tels.push(v);else if(k.startsWith('EMAIL')||k.includes('.EMAIL'))c.emails.push(v);else if(k.startsWith('ORG'))c.org=v.replace(/;+$/,'').replace(/;/g,' · ');else if(k==='N'&&!c.name)c.name=v.split(';').filter(Boolean).reverse().join(' ')}return c});
+}
+
+/* ---------- state & helpers ---------- */
+const S={chat:null,tab:'overview',rendered:{},urls:new Map()};
+const COLORS=['#2dd4bf','#a78bfa','#f472b6','#fbbf24','#60a5fa','#34d399','#fb923c','#f87171'];
+function colorOf(s){const C=S.chat;if(s<0)return'#5b6274';const k=C.order.indexOf(s),i=k<0?s:k;return i<COLORS.length?COLORS[i]:`hsl(${Math.round((i*137.508)%360)},62%,64%)`}
+function sname(s){const C=S.chat;if(s<0)return'Unknown';return s===C.meIdx?'You':C.senders[s]}
+function fullName(s){return s<0?'Unknown':S.chat.senders[s]}
+function urlFor(md){if(!md.file)return null;let u=S.urls.get(md.id);if(!u){u=URL.createObjectURL(md.file);S.urls.set(md.id,u)}return u}
+function noteOf(it){return S.chat.notes.get(it.mk)}
+function searchText(md){const n=noteOf(md);return md.base+(n?' '+(n.tags||[]).join(' ')+' '+(n.note||''):'')}
+function avatar(s,size=34){const n=fullName(s);return `<span class="av" style="background:${colorOf(s)};width:${size}px;height:${size}px;font-size:${Math.round(size*.4)}px">${esc((n.match(/\p{L}|\d/u)||['?'])[0].toUpperCase())}</span>`}
+function splitBar(vals,order){const tot=vals.reduce((a,b)=>a+b,0)||1;return `<div class="bar">${order.map(s=>vals[s]?`<i style="width:${vals[s]/tot*100}%;background:${colorOf(s)}"></i>`:'').join('')}</div>`}
+function mix(a,b,t){const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const x=p(a),y=p(b);return `rgb(${x.map((v,i)=>Math.round(v+(y[i]-v)*t)).join(',')})`}
+
+/* lazy media loading */
+const lazyIO=new IntersectionObserver(es=>{for(const e of es){if(!e.isIntersecting)continue;const el=e.target;lazyIO.unobserve(el);const md=S.chat?.media[+el.dataset.mid];const u=md&&urlFor(md);if(!u)continue;el.src=el.tagName==='VIDEO'?u+'#t=0.1':u}},{rootMargin:'400px'});
+function hydrate(root){$$('[data-mid]:not([src])',root).forEach(el=>lazyIO.observe(el))}
+
+/* ---------- loading flow ---------- */
+const fileIn=$('#fileIn'),drop=$('#drop');
+fileIn.addEventListener('change',()=>{handleFiles(fileIn.files);fileIn.value=''});
+['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();if(!$('#home').hidden)drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+document.addEventListener('drop',e=>{if(e.dataTransfer?.files?.length)handleFiles(e.dataTransfer.files)});
+
+async function handleFiles(list){
+  const files=[...list];if(!files.length)return;
+  loader('Reading files…');await nextFrame();
+  try{
+    const fmap=new Map();let zipName=null;
+    for(const f of files){
+      if(/\.zip$/i.test(f.name)||await isZip(f)){
+        zipName=f.name;const ents=await readZip(f);
+        const totB=ents.reduce((a,e)=>a+e.size,0);let doneB=0;
+        for(let k=0;k<ents.length;k++){const en=ents[k],base=en.name.split('/').pop();if(!base||base.startsWith('.')||en.name.startsWith('__MACOSX'))continue;if(k%8===0||en.size>8e6){loader(`Unzipping ${k+1} / ${ents.length} · ${fmtSize(doneB)} of ${fmtSize(totB)}…`);await nextFrame()}fmap.set(base,await inflate(en,mimeOf(base)));doneB+=en.size}
+      }else fmap.set(f.name,f);
+    }
+    const txts=[...fmap.keys()].filter(n=>/\.txt$/i.test(n));
+    const tn=txts.find(n=>/^WhatsApp Chat|^_chat\.txt$/i.test(n))||txts.sort((a,b)=>fmap.get(b).size-fmap.get(a).size)[0];
+    if(!tn)throw new Error('No chat .txt found. Drop the exported .zip, or the .txt together with its media.');
+    loader('Parsing chat…');await nextFrame();
+    const text=await fmap.get(tn).text();fmap.delete(tn);
+    let title=tn.replace(/\.txt$/i,'').replace(/^WhatsApp Chat\s*(with|-)\s*/i,'');
+    if(/^_chat$/i.test(title))title=(zipName||'Chat').replace(/\.zip$/i,'').replace(/^WhatsApp Chat\s*(with|-)\s*/i,'');
+    const id='c'+hashStr(title+'|'+text.length+'|'+text.slice(0,300));
+    const existing=await DB.chat(id).catch(()=>null);
+    await openChat({id,title,text,files:fmap,me:existing?existing.me:undefined,fresh:true});
+  }catch(err){console.error(err);loader(false);toast(err.message||'Could not read that file',true)}
+}
+
+async function openChat(rec){
+  loader('Parsing chat…');await nextFrame();
+  const names=[...rec.files.keys()];
+  const R=await runCore(rec.text,names,(n,of)=>loader(n<0?'Crunching numbers…':`Parsing ${fmtN(n)} / ${fmtN(of)} lines…`));
+  if(!R.C.msgs.some(m=>m.type!=='system')){loader(false);throw new Error('No messages found. Is this a WhatsApp export?')}
+  loader('Building views…');await nextFrame();
+  closeChat();
+  const C={id:rec.id,title:rec.title,text:rec.text,files:rec.files,msgs:R.C.msgs,senders:R.C.senders,media:R.C.media};
+  for(const md of C.media)md.file=md.name?(rec.files.get(md.name)||null):null;
+  S.chat=C;C.order=C.senders.map((_,i)=>i);C.meIdx=-1;C.stats=R.stats;
+  const notes=await DB.notes(C.id).catch(()=>[]);C.notes=new Map((notes||[]).map(n=>[n.mk,n]));
+  loader(false);
+  let me=rec.me;
+  if(me===undefined&&C.senders.length>=2)me=await askMe(C);
+  setMe(C,me);buildContext(C);
+  showApp();
+  if(rec.fresh){
+    const size=[...C.files.values()].reduce((a,f)=>a+f.size,0)+C.text.length;
+    if(size>500*1048576&&!(await confirmBox('Save this chat in the browser?',`It would use about ${fmtSize(size)} of browser storage. Everything works without saving; you would just re-import the export next time.`,'Save'))){toast('Not saved. Drop the export again next time.');return}
+    try{await DB.putChat({id:C.id,title:C.title,text:C.text,me:me??null,saved:Date.now(),count:C.stats.total,first:C.stats.first,last:C.stats.last,files:C.files.size,size});
+      try{navigator.storage?.persist?.()}catch{}
+      await DB.putFiles(C.id,C.files);toast('Saved in this browser for next time')}
+    catch(e){console.warn(e);toast('Analysis works, but saving offline failed (storage blocked or full)',true)}
+  }
+}
+function setMe(C,me){
+  C.meName=me??null;C.meIdx=me!=null?C.senders.indexOf(me):-1;
+  const byCount=C.senders.map((_,i)=>i).sort((a,b)=>C.stats.per[b].msgs-C.stats.per[a].msgs);
+  C.order=C.meIdx>=0?[C.meIdx,...byCount.filter(i=>i!==C.meIdx)]:byCount;
+}
+function askMe(C){
+  return new Promise(res=>{
+    const o=modal(`<h2>Which one is you?</h2><p>Your side shows as “You”, in teal, on the right in the chat view.</p><div class="opts">${C.senders.map((n,i)=>`<button class="opt" data-i="${i}">${ic('user')}<b>${esc(n)}</b><span class="mut num">${fmtN(C.stats.per[i].msgs)} msgs</span></button>`).join('')}</div><div class="acts"><button class="btn" data-skip>Neither / skip</button></div>`);
+    o.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b){o.remove();res(C.senders[+b.dataset.i])}else if(e.target.closest('[data-skip]')){o.remove();res(null)}});
+  });
+}
+function closeChat(){WR.k=0;LV.kind='all';LV.sender='all';LV.q='';MV.q='';MV.type='all';MV.sender='all';OV.sort='msgs';OV.dir=1;closeSearch();for(const u of S.urls.values())URL.revokeObjectURL(u);S.urls.clear();S.chat=null;S.rendered={};MV.sel.clear();MV.selMode=false;closeLB();closeDrawer()}
+
+function showApp(){
+  const C=S.chat,st=C.stats;
+  $('#home').hidden=true;$('#appv').hidden=false;
+  $('#chatTitle').textContent=C.title;
+  $('#chatSub').textContent=`${fmtN(st.total)} messages · ${fmtDateS(new Date(st.first))} → ${fmtDateS(new Date(st.last))} · ${C.senders.length} people`;
+  document.title=`${C.title} · Threadline`;
+  const h=(location.hash||'').slice(1);
+  switchTab(['overview','timeline','calendar','media','links','chat','wrapped'].includes(h)?h:'overview');
+}
+async function showHome(){
+  closeChat();$('#appv').hidden=true;$('#home').hidden=false;document.title='Threadline — WhatsApp Chat Analyzer';
+  try{history.replaceState(null,'',location.pathname+location.search)}catch{}
+  renderSaved();
+}
+async function renderSaved(){
+  const box=$('#saved');let list=[];
+  try{list=await DB.chats()}catch{box.innerHTML='<div class="dim" style="font-size:12px">Offline storage isn’t available in this view, so chats won’t be remembered.</div>';return}
+  list.sort((a,b)=>b.saved-a.saved);
+  box.innerHTML=list.length?`<h3 style="margin-bottom:4px">Saved in this browser</h3>`+list.map(c=>`<div class="sv"><span class="av" style="border-radius:10px">${esc((c.title.match(/\p{L}|\d/u)||['?'])[0].toUpperCase())}</span><div class="t"><b>${esc(c.title)}</b><span class="num">${fmtN(c.count)} msgs · ${c.files} files · ${fmtSize(c.size||0)} · ${c.first?fmtDateS(new Date(c.first))+' → '+fmtDateS(new Date(c.last)):''}</span></div><button class="btn" data-open="${c.id}">Open</button><button class="ibtn danger" data-del="${c.id}" title="Forget">${ic('trash')}</button></div>`).join(''):'';
+}
+$('#saved').addEventListener('click',async e=>{
+  const o=e.target.closest('[data-open]'),d=e.target.closest('[data-del]');
+  if(o){loader('Loading saved chat…');await nextFrame();try{const rec=await DB.chat(o.dataset.open);const fl=await DB.files(rec.id);rec.files=new Map(fl.map(f=>[f.name,f.blob]));await openChat(rec)}catch(err){console.error(err);loader(false);toast('Could not load: '+err.message,true)}}
+  if(d){if(await confirmBox('Forget this chat?','Removes the chat, its media, tags and notes from this browser. The original export on your device is untouched.','Forget')){await DB.del(d.dataset.del).catch(()=>{});renderSaved();toast('Forgotten')}}
+});
+$('#btnHome').onclick=showHome;
+$('#btnForget').onclick=async()=>{const C=S.chat;if(!C)return;if(await confirmBox(`Forget “${C.title}”?`,'Removes the chat, its media, tags and notes from this browser. The original export on your device is untouched.','Forget')){await DB.del(C.id).catch(()=>{});toast('Forgotten');showHome()}};
+
+/* ---------- tabs ---------- */
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)switchTab(b.dataset.tab)});
+function switchTab(t){
+  S.tab=t;$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  $$('.view').forEach(v=>v.hidden=v.id!=='v-'+t);
+  try{history.replaceState(null,'','#'+t)}catch{}
+  if(!S.rendered[t]){S.rendered[t]=true;({overview:renderOverview,timeline:renderTimeline,calendar:renderCalendar,media:renderMedia,links:renderLinks,chat:renderChat,wrapped:renderWrapped})[t]()}
+  $('#selbarWrap')?.toggleAttribute('hidden',t!=='media'||!MV.selMode);
+  if(t!=='chat')scrollTo({top:0});
+}
+addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(S.chat&&h&&h!==S.tab&&$('#v-'+h))switchTab(h)});
+
+/* ---------- OVERVIEW ---------- */
+function renderOverview(){
+  const C=S.chat,st=C.stats,v=$('#v-overview'),[A,B]=C.order,pa=st.per[A],pb=B!=null?st.per[B]:null;
+  const spanDays=Math.round((keyDate(dayKey(new Date(st.last)))-keyDate(dayKey(new Date(st.first))))/DAY)+1;
+  const media=C.media.length,files=C.media.filter(m=>m.file).length;
+  const peakH=st.hours.indexOf(Math.max(...st.hours)),peakW=st.wd.indexOf(Math.max(...st.wd));
+  const kpis=[
+    [fmtN(st.total),'Messages',`${fmtN(st.total/Math.max(1,st.dayKeys.length))} per active day`],
+    [fmtN(spanDays),'Days span',`${fmtDateS(new Date(st.first))} → ${fmtDateS(new Date(st.last))}`],
+    [fmtN(st.dayKeys.length),'Active days',`${pct(st.dayKeys.length,spanDays)}% of all days`],
+    [st.streak.len+'d','Longest streak',st.streak.from?`${fmtDateS(keyDate(st.streak.from))} → ${fmtDateS(keyDate(st.streak.to))}`:''],
+    [fmtN(media),'Media',`${files} files in export`],
+    [fmtHour(peakH),'Peak hour',`busiest weekday: ${WD[peakW]}`],
+  ];
+  let vs='';const grp=C.senders.length>2;
+  if(grp){vs=`<div class="card s12"><div class="row-h"><h3>Leaderboard · ${C.senders.length} people</h3><span class="dim" style="font-size:11.5px">tap a column to sort</span></div><div class="bwrap" id="board">${boardHTML()}</div></div>`}
+  else if(pb){
+    const reA=median(pa.replies),reB=median(pb.replies),totStarts=pa.starts+pb.starts;
+    const rows=[
+      ['Messages',pa.msgs,pb.msgs,fmtN],
+      ['Words',pa.words,pb.words,fmtN],
+      ['Avg words / message',pa.words/(pa.textMsgs||1),pb.words/(pb.textMsgs||1),x=>x.toFixed(1)],
+      ['Conversations started',pa.starts,pb.starts,x=>`${fmtN(x)}<small class="dim"> ${pct(x,totStarts)}%</small>`],
+      ['Median reply time',reA??0,reB??0,x=>x?fmtDur(x):'—','lower is faster'],
+      ['Messages per turn',pa.msgs/(pa.turns||1),pb.msgs/(pb.turns||1),x=>x.toFixed(2),'double-texting'],
+      ['Media shared',pa.media,pb.media,fmtN],
+      ['Links shared',pa.links,pb.links,fmtN],
+      ['Questions asked',pa.q,pb.q,fmtN],
+      ['Laughs',pa.laugh,pb.laugh,fmtN],
+      ['Emoji used',sumMap(pa.emo),sumMap(pb.emo),fmtN],
+      ['Night owl (12–5am)',pa.night,pb.night,fmtN],
+      ['Deleted · edited',pa.del+pa.edit,pb.del+pb.edit,fmtN],
+      ['Longest message (words)',pa.longest.w,pb.longest.w,fmtN],
+    ];
+    vs=`<div class="card s7"><div class="vs-head"><div class="who">${avatar(A)}<div style="min-width:0"><b>${esc(sname(A))}</b><small>${esc(A===C.meIdx?fullName(A):pct(pa.msgs,st.total)+'% of messages')}</small></div></div><span class="vs-x">VS</span><div class="who r"><div style="min-width:0"><b>${esc(sname(B))}</b><small>${pct(pb.msgs,st.total)}% of messages</small></div>${avatar(B)}</div></div>
+    ${rows.filter(r=>r[1]||r[2]).map(([l,a,b,f,h])=>`<div class="vs-row"><div class="vs-n num" style="color:${a>=b?colorOf(A):'inherit'}">${f(a)}</div><div><div class="vs-l">${l}${h?` <span class="dim">· ${h}</span>`:''}</div><div class="bar"><i style="width:${(a/((a+b)||1))*100}%;background:${colorOf(A)}"></i><i style="width:${(b/((a+b)||1))*100}%;background:${colorOf(B)}"></i></div></div><div class="vs-n b num" style="color:${b>a?colorOf(B):'inherit'}">${f(b)}</div></div>`).join('')}
+    ${C.senders.length>2?`<div class="dim" style="font-size:11.5px;margin-top:8px">Showing the top two of ${C.senders.length} participants.</div>`:''}</div>`;
+  }
+  // fun facts
+  const facts=[];
+  const top=st.top[0];if(top)facts.push([fmtDate(keyDate(top[0])),`busiest day: ${top[1].n} messages`]);
+  if(st.silence.len>0)facts.push([`${st.silence.len} days`,`longest silence: ${fmtDateS(keyDate(st.silence.from))} → ${fmtDateS(keyDate(st.silence.to))}`]);
+  if(grp)groupFacts(facts);
+  else if(pb){const s=pa.starts>=pb.starts?A:B,ps=st.per[s];facts.push([`${sname(s)} ${s===C.meIdx?'start':'starts'} ${pct(ps.starts,pa.starts+pb.starts)}%`,'of conversations after a 6h+ gap']);
+    const ra=median(pa.replies),rb=median(pb.replies);if(ra!=null&&rb!=null){const f=ra<=rb?A:B;facts.push([`${sname(f)} ${f===C.meIdx?'reply':'replies'} faster`,`median ${fmtDur(Math.min(ra,rb))} vs ${fmtDur(Math.max(ra,rb))}`])}}
+  const mon=[...st.months.values()].sort((a,b)=>b.n-a.n)[0];if(mon){const[y,m]=mon.key.split('-');facts.push([`${MONF[+m-1]} ${y}`,`peak month: ${fmtN(mon.n)} messages`])}
+  const allEmo=new Map();st.per.forEach(p=>p.emo.forEach((v,k)=>allEmo.set(k,(allEmo.get(k)||0)+v)));const te=[...allEmo].sort((a,b)=>b[1]-a[1])[0];if(te)facts.push([te[0],`most used emoji, ${te[1]}×`]);
+  const links=st.per.reduce((a,p)=>a+p.links,0);facts.push([`${fmtN(links)} links`,`${C.msgs.filter(m=>m.loc).length} locations shared`]);
+  const nightAll=st.per.reduce((a,p)=>a+p.night,0);facts.push([`${pct(nightAll,st.total)}% after midnight`,'messages between 12am and 5am']);
+
+  // hours chart
+  const HS=hourSeries(),hmax=Math.max(1,...st.hours),W=480,H=120,bw=W/24;
+  let hs='';for(let h=0;h<24;h++){let y=H-14;const tipH=`<b>${fmtHour(h)}–${fmtHour((h+1)%24)}</b>${HS.map(x=>`${esc(x.l)}: ${x.v[h]}`).join('<br>')}`;for(const sr of HS){const v=sr.v[h];if(!v)continue;const bh=v/hmax*(H-22);y-=bh;hs+=`<rect x="${h*bw+2}" y="${y}" width="${bw-4}" height="${bh}" rx="2" fill="${sr.c}" data-tip="${tipH}"/>`}if(h%3===0)hs+=`<text x="${h*bw+bw/2}" y="${H-2}" text-anchor="middle">${fmtHour(h)}</text>`}
+  const wmax=Math.max(1,...st.wd);
+  const wdHTML=WD.map((d,i)=>{const vals=st.per.map(p=>p.wd[i]);return `<div class="wd-r"><span class="mut">${d}</span><div class="bar" style="width:${Math.max(2,st.wd[i]/wmax*100)}%">${C.order.map(s=>vals[s]?`<i style="width:${vals[s]/(st.wd[i]||1)*100}%;background:${colorOf(s)}"></i>`:'').join('')}</div><span class="num mut" style="text-align:right">${fmtN(st.wd[i])}</span></div>`}).join('');
+
+  const wordsCol=s=>{const p=st.per[s];const w=[...p.wmap].sort((a,b)=>b[1]-a[1]).slice(0,14),e=[...p.emo].sort((a,b)=>b[1]-a[1]).slice(0,8);return `<div><div class="who" style="margin-bottom:10px"><span class="dot" style="background:${colorOf(s)}"></span><b style="font-size:13px">${esc(sname(s))}</b></div><div class="chips">${w.map(([k,c])=>`<button class="chip" data-chatq="${esc(k)}">${esc(k)} <small>${c}</small></button>`).join('')||'<span class="dim">—</span>'}</div><div class="emo">${e.map(([k,c])=>`<span>${k}<small>${c}</small></span>`).join('')}</div></div>`};
+  const maxTop=st.top[0]?.[1].n||1;
+  const daysHTML=st.top.map(([k,d],i)=>{const dt=keyDate(k),pv=C.msgs.slice(d.first,d.last+1).find(m=>m.type==='text'&&m.text.length>12);return `<button class="day-r" data-day="${k}"><span class="rk num">${i+1}</span><span class="dt"><b>${fmtDate(dt)}</b><small>${WDF[dt.getDay()]}</small></span><span style="min-width:0"><div class="bar" style="width:${Math.max(6,d.n/maxTop*100)}%;height:7px">${C.order.map(s=>d.per[s]?`<i style="width:${d.per[s]/d.n*100}%;background:${colorOf(s)}"></i>`:'').join('')}</div>${pv?`<div class="pv">${esc(pv.text.slice(0,90))}</div>`:''}</span><span class="c num">${d.n}</span></button>`}).join('');
+
+  v.innerHTML=`<div class="kpis">${kpis.map(([a,b,c])=>`<div class="card kpi"><div class="v num">${a}</div><div class="l">${b}</div><div class="d">${esc(c)}</div></div>`).join('')}</div>
+  <div class="g">${vs}<div class="card ${pb&&!grp?'s5':'s12'}"><div class="row-h"><h3>Highlights</h3></div><div class="facts">${facts.map(([a,b])=>`<div class="fact"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join('')}</div></div></div>${grp?`<div class="g"><div class="s12">${matrixHTML()}</div></div>`:''}
+  <div class="g"><div class="card s7"><div class="row-h"><h3>Daily rhythm</h3><div class="chips">${C.order.slice(0,4).map(s=>`<span class="chip"><span class="dot" style="background:${colorOf(s)}"></span>${esc(sname(s))}</span>`).join('')}</div></div><svg class="chart" viewBox="0 0 ${W} ${H}">${hs}</svg></div><div class="card s5"><div class="row-h"><h3>By weekday</h3></div><div class="wd">${wdHTML}</div></div></div>
+  <div class="g"><div class="card s6"><div class="row-h"><h3>Days you chatted most</h3><span class="dim" style="font-size:11.5px">tap a day to read it</span></div><div class="days">${daysHTML}</div></div><div class="card s6"><div class="row-h"><h3>Signature words & emoji</h3><span class="dim" style="font-size:11.5px">tap a word to find it</span></div><div class="words">${C.order.filter(s=>st.per[s].msgs>0).slice(0,grp?4:2).map(wordsCol).join('')}</div></div></div>`;
+  if(grp)wireBoard();
+}
+const sumMap=m=>{let s=0;m.forEach(v=>s+=v);return s};
+document.addEventListener('click',e=>{
+  const d=e.target.closest('[data-day]');if(d&&!e.target.closest('.lb')){openDay(d.dataset.day);return}
+  const q=e.target.closest('[data-chatq]');if(q){goChatSearch(q.dataset.chatq);return}
+  const o=e.target.closest('[data-open]');if(o&&S.chat&&!o.closest('#saved')){e.preventDefault();openLB(+o.dataset.open);return}
+  const g=e.target.closest('[data-goto]');if(g){closeDrawer();closeLB();goChat(+g.dataset.goto);return}
+});
+
+/* ---------- TIMELINE ---------- */
+function renderTimeline(){
+  const C=S.chat,st=C.stats,v=$('#v-timeline');
+  const f=new Date(st.first),l=new Date(st.last),months=[];
+  for(let y=f.getFullYear(),m=f.getMonth();y<l.getFullYear()||(y===l.getFullYear()&&m<=l.getMonth());m===11?(y++,m=0):m++)months.push(`${y}-${pad(m+1)}`);
+  const max=Math.max(1,...months.map(k=>st.months.get(k)?.n||0));
+  const bw=Math.max(10,Math.min(30,1180/months.length)),W=months.length*bw,H=150;
+  let bars='';
+  months.forEach((k,i)=>{const mo=st.months.get(k),[y,m]=k.split('-');let yy=H-18;
+    if(mo)for(const s of C.order){const val=mo.per[s];if(!val)continue;const bh=val/max*(H-30);yy-=bh;bars+=`<rect x="${i*bw+1.5}" y="${yy}" width="${bw-3}" height="${bh}" rx="2" fill="${colorOf(s)}" style="cursor:pointer" data-month="${k}" data-tip="<b>${MONF[+m-1]} ${y}</b>${fmtN(mo.n)} msgs · ${mo.days.size} days<br>${C.order.map(x=>`${esc(sname(x))}: ${mo.per[x]}`).join('<br>')}"/>`}
+    else bars+=`<rect x="${i*bw+1.5}" y="${H-20}" width="${bw-3}" height="2" fill="rgba(255,255,255,.08)"/>`;
+    if(m==='01'||i===0)bars+=`<text x="${i*bw+2}" y="${H-3}">${m==='01'?y:MON[+m-1]+' '+y.slice(2)}</text>`;
+  });
+  // vertical timeline
+  let list='',gap=0;const hot=new Set([...st.months.values()].sort((a,b)=>b.n-a.n).slice(0,3).map(m=>m.key));
+  for(const k of [...months].reverse()){
+    const mo=st.months.get(k);if(!mo){gap++;continue}
+    if(gap){list+=`<div class="tl-gap">${gap} quiet month${gap>1?'s':''}</div>`;gap=0}
+    const[y,m]=k.split('-'),words=[...mo.words].sort((a,b)=>b[1]-a[1]).slice(0,6),best=mo.best.i>=0?C.msgs[mo.best.i]:null;
+    const thumbs=mo.media.map(id=>C.media[id]).filter(md=>md.file&&(md.type==='image'||md.type==='video'||md.type==='sticker')).slice(0,8);
+    const others=mo.media.length-thumbs.length;
+    list+=`<div class="tl-item${hot.has(k)?' hot':''}" id="m-${k}"><div class="card"><div class="tl-h"><b>${MONF[+m-1]} ${y}</b><span class="mut num">${fmtN(mo.n)} msg${mo.n===1?'':'s'} · ${mo.days.size} active day${mo.days.size>1?'s':''}${mo.media.length?` · ${mo.media.length} media`:''}</span><span class="sp"></span><button class="btn" data-goto="${mo.first}">${ic('msg')} Read</button></div>
+    <div style="max-width:360px">${splitBar(mo.per,C.order)}</div>
+    ${words.length?`<div class="chips" style="margin-top:10px">${words.map(([w,c])=>`<button class="chip" data-chatq="${esc(w)}">${esc(w)} <small>${c}</small></button>`).join('')}</div>`:''}
+    ${best&&best.text?`<div class="tl-q">“${esc(best.text.length>180?best.text.slice(0,180)+'…':best.text)}”<small>${esc(sname(best.s))} · ${fmtDate(new Date(best.t))}</small></div>`:''}
+    ${thumbs.length||others?`<div class="tl-m">${thumbs.map(md=>`<button data-open="${md.id}">${md.type==='video'?`<video data-mid="${md.id}" muted preload="metadata" playsinline></video>`:`<img data-mid="${md.id}" alt="">`}</button>`).join('')}${others>0?`<button data-month-media="${k}" class="num" style="font-size:12px">+${others}</button>`:''}</div>`:''}
+    </div></div>`;
+  }
+  v.innerHTML=`<div class="card"><div class="row-h"><h3>Messages per month</h3><div class="chips">${C.order.slice(0,4).map(s=>`<span class="chip"><span class="dot" style="background:${colorOf(s)}"></span>${esc(sname(s))}</span>`).join('')}</div></div><div class="tl-chart"><svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${Math.min(W,months.length*10)}px;${W<600?`max-width:${W*1.6}px`:''}">${bars}</svg></div><div class="dim" style="font-size:11.5px;margin-top:6px">Tap a bar to jump to that month. Gold dots mark your three busiest months.</div></div><div class="card" id="trends"></div><div class="tl">${list}</div>`;
+  hydrate(v);drawTrends();
+  v.addEventListener('click',e=>{const r=e.target.closest('[data-month]');if(r&&!e.target.closest('#trends .chips')){const el=$('#m-'+r.dataset.month);if(el){el.scrollIntoView({behavior:'smooth',block:'start'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1500)}}
+    const mm=e.target.closest('[data-month-media]');if(mm){const[y,m]=mm.dataset.monthMedia.split('-');switchTab('media');setMediaQuery(`${MON[+m-1].toLowerCase()} ${y}`)}});
+}
+
+/* ---------- CALENDAR ---------- */
+const CAL={year:null,ym:null};
+function renderCalendar(){
+  const C=S.chat,st=C.stats,v=$('#v-calendar');
+  const years=[...new Set(st.dayKeys.map(k=>+k.slice(0,4)))];
+  if(CAL.year==null)CAL.year=years[years.length-1];
+  if(CAL.ym==null)CAL.ym=st.dayKeys[st.dayKeys.length-1].slice(0,7);
+  const ns=st.dayKeys.map(k=>st.days.get(k).n).sort((a,b)=>a-b);CAL.cap=ns[Math.floor(ns.length*.95)]||1;
+  v.innerHTML=`<div class="card"><div class="row-h"><h3>Activity heatmap</h3><div class="chips" id="yrs">${years.map(y=>`<button class="chip${y===CAL.year?' on':''}" data-y="${y}">${y} <small>${fmtN(st.dayKeys.filter(k=>k.startsWith(y)).reduce((a,k)=>a+st.days.get(k).n,0))}</small></button>`).join('')}</div></div><div class="hm-wrap" id="hm"></div>
+  <div class="legend"><span>Less</span>${[.15,.35,.6,.85,1].map(o=>`<i style="background:${C.senders.length>2?'#60a5fa':mix(colorOf(C.order[0]),colorOf(C.order[1]??C.order[0]),.5)};opacity:${o}"></i>`).join('')}<span>More</span>${C.senders.length>2?'':`<span style="margin-left:14px">Colour leans to whoever talked more:</span>${C.order.slice(0,2).map(s=>`<i style="background:${colorOf(s)}"></i><span>${esc(sname(s))}</span>`).join('')}`}</div></div>
+  <div class="g"><div class="card s7"><div class="row-h"><button class="ibtn" id="mPrev">${ic('left')}</button><h3 id="mLbl" style="color:var(--tx);font-size:13px;letter-spacing:.02em;text-transform:none"></h3><button class="ibtn" id="mNext">${ic('right')}</button></div><div class="mcal" id="mcal"></div></div>
+  <div class="card s5"><div class="row-h"><h3 id="ytopH"></h3></div><div class="days" id="ytop"></div></div></div>`;
+  drawHeat();drawMonth();drawYearTop();
+  $('#yrs').onclick=e=>{const b=e.target.closest('[data-y]');if(!b)return;CAL.year=+b.dataset.y;$$('#yrs .chip').forEach(c=>c.classList.toggle('on',c===b));drawHeat();drawYearTop();const ks=st.dayKeys.filter(k=>k.startsWith(CAL.year));if(ks.length){CAL.ym=ks[ks.length-1].slice(0,7);drawMonth()}};
+  $('#mPrev').onclick=()=>stepMonth(-1);$('#mNext').onclick=()=>stepMonth(1);
+}
+function heatColor(d){const C=S.chat,[A,B]=C.order;if(C.senders.length>2){return{c:'#60a5fa',o:.32+.68*Math.sqrt(Math.min(1,d.n/CAL.cap))}}const share=B!=null?(d.per[B]/(d.n||1)):0;const it=.32+.68*Math.sqrt(Math.min(1,d.n/CAL.cap));return{c:mix(colorOf(A),colorOf(B??A),share),o:it}}
+function drawHeat(){
+  const C=S.chat,st=C.stats,y=CAL.year,start=new Date(y,0,1),off=(start.getDay()+6)%7,cs=12,g=3,L=26,T=16;
+  const end=new Date(y,11,31),weeks=Math.ceil((off+Math.round((end-start)/DAY)+1)/7);
+  let s='';
+  for(let i=0,d=new Date(start);d<=end;i++,d.setDate(d.getDate()+1)){
+    const idx=off+i,w=Math.floor(idx/7),r=idx%7,k=dayKey(d),dd=st.days.get(k),x=L+w*(cs+g),yy=T+r*(cs+g);
+    if(d.getDate()===1)s+=`<text x="${x}" y="10">${MON[d.getMonth()]}</text>`;
+    if(dd){const{c,o}=heatColor(dd);s+=`<rect x="${x}" y="${yy}" width="${cs}" height="${cs}" fill="${c}" fill-opacity="${o}" data-day="${k}" data-tip="<b>${fmtDate(d)}</b>${dd.n} msgs<br>${C.order.slice(0,3).map(x=>`${esc(sname(x))}: ${dd.per[x]}`).join(' · ')}"/>`}
+    else s+=`<rect x="${x}" y="${yy}" width="${cs}" height="${cs}" fill="rgba(255,255,255,.045)" style="cursor:default"/>`;
+  }
+  ['Mon','','Wed','','Fri','',''].forEach((l,r)=>{if(l)s+=`<text x="0" y="${T+r*(cs+g)+cs-2}">${l}</text>`});
+  const W=L+weeks*(cs+g);
+  $('#hm').innerHTML=`<svg class="chart hm" viewBox="0 0 ${W} ${T+7*(cs+g)}" style="min-width:${W}px;max-width:${W*1.35}px">${s}</svg>`;
+  const hm=$('#hm'),last=[...st.dayKeys].reverse().find(k=>k.startsWith(String(y)));if(last){const wk=Math.floor((off+Math.round((keyDate(last)-start)/DAY))/7);hm.scrollLeft=Math.max(0,L+wk*(cs+g)-hm.clientWidth*.6)}
+}
+function stepMonth(dx){const[y,m]=CAL.ym.split('-').map(Number);const d=new Date(y,m-1+dx,1);const k=`${d.getFullYear()}-${pad(d.getMonth()+1)}`;const st=S.chat.stats;if(k<st.dayKeys[0].slice(0,7)||k>st.dayKeys[st.dayKeys.length-1].slice(0,7))return;CAL.ym=k;drawMonth()}
+function drawMonth(){
+  const C=S.chat,st=C.stats,[y,m]=CAL.ym.split('-').map(Number),first=new Date(y,m-1,1),off=(first.getDay()+6)%7,nd=new Date(y,m,0).getDate();
+  const mo=st.months.get(CAL.ym);
+  $('#mLbl').innerHTML=`${MONF[m-1]} ${y} <span class="mut num" style="font-weight:400">· ${mo?fmtN(mo.n)+(mo.n===1?' msg':' msgs'):'no messages'}</span>`;
+  let h=WD.map(d=>`<div class="wh">${d[0]}<span class="hide-s">${d.slice(1)}</span></div>`).join('');
+  for(let i=0;i<off;i++)h+='<div class="mc e"></div>';
+  for(let d=1;d<=nd;d++){const k=`${y}-${pad(m)}-${pad(d)}`,dd=st.days.get(k);
+    if(dd){const{c,o}=heatColor(dd);h+=`<button class="mc has" data-day="${k}" data-tip="<b>${fmtDate(keyDate(k))}</b>${dd.n} msgs"><span class="bg" style="background:${c};opacity:${o*.35}"></span><span class="dn">${d}</span><span class="ct num">${dd.n}</span>${splitBar(dd.per,C.order)}</button>`}
+    else h+=`<div class="mc none"><span class="dn">${d}</span></div>`;
+  }
+  $('#mcal').innerHTML=h;
+}
+function drawYearTop(){
+  const C=S.chat,st=C.stats,y=String(CAL.year);
+  const list=st.dayKeys.filter(k=>k.startsWith(y)).map(k=>[k,st.days.get(k)]).sort((a,b)=>b[1].n-a[1].n).slice(0,8);
+  $('#ytopH').textContent=`Top days of ${y}`;const max=list[0]?.[1].n||1;
+  $('#ytop').innerHTML=list.map(([k,d],i)=>{const dt=keyDate(k);return `<button class="day-r" data-day="${k}"><span class="rk num">${i+1}</span><span class="dt"><b>${fmtDate(dt)}</b><small>${WDF[dt.getDay()]}</small></span><span><div class="bar" style="width:${Math.max(6,d.n/max*100)}%;height:7px">${C.order.map(s=>d.per[s]?`<i style="width:${d.per[s]/d.n*100}%;background:${colorOf(s)}"></i>`:'').join('')}</div></span><span class="c num">${d.n}</span></button>`}).join('')||'<div class="empty">No messages this year</div>';
+}
+
+/* day drawer */
+function openDay(k){
+  const C=S.chat,d=C.stats.days.get(k);if(!d)return;closeDrawer();
+  const sc=document.createElement('div');sc.className='scrim';sc.onclick=closeDrawer;
+  const dr=document.createElement('div');dr.className='drawer';dr.id='drawer';
+  const dt=keyDate(k);
+  dr.innerHTML=`<div class="dh"><div><b>${fmtDate(dt)}</b><div class="mut num" style="font-size:12px">${WDF[dt.getDay()]} · ${d.n} messages · ${C.order.filter(s=>d.per[s]).map(s=>`${esc(sname(s))} ${d.per[s]}`).join(' · ')}</div></div><button class="btn" data-goto="${d.first}">${ic('msg')} In chat</button><button class="ibtn" id="drX">${ic('x')}</button></div><div class="db">${rangeHTML(d.first,d.last+1,{noSep:true})}</div>`;
+  document.body.append(sc,dr);document.body.classList.add('noscroll');$('#drX').onclick=closeDrawer;hydrate(dr);
+}
+function closeDrawer(){$('#drawer')?.remove();$('.scrim')?.remove();if($('#lb').hidden)document.body.classList.remove('noscroll')}
+
+/* ---------- CHAT ---------- */
+const CV={s:0,e:0,q:'',hits:[],hi:-1,lock:false};const CHUNK=200,MAXR=900;
+function richText(t,q){
+  const re=/https?:\/\/[^\s<>"]+/g;let out='',last=0,m;
+  const plain=s=>fmtWA(hl(esc(s),q));
+  while((m=re.exec(t))){out+=plain(t.slice(last,m.index));const u=m[0];out+=`<a href="${esc(u)}" target="_blank" rel="noopener">${hl(esc(u.length>60?u.slice(0,57)+'…':u),q)}</a>`;last=m.index+u.length}
+  return (out+plain(t.slice(last))).replace(/\n/g,'<br>');
+}
+function hl(s,q){if(!q)return s;return s.replace(new RegExp(reEsc(esc(q)),'gi'),x=>`<mark>${x}</mark>`)}
+function fmtWA(s){return s.replace(/(^|[\s(])\*([^*\n]+)\*(?=$|[\s.,!?)])/g,'$1<b>$2</b>').replace(/(^|[\s(])_([^_\n]+)_(?=$|[\s.,!?)])/g,'$1<i>$2</i>').replace(/(^|[\s(])~([^~\n]+)~(?=$|[\s.,!?)])/g,'$1<s>$2</s>')}
+function mediaBubble(md){
+  const u=md.file;
+  if(u&&(md.type==='image'||md.type==='sticker'))return `<button class="bm" data-open="${md.id}"${md.type==='sticker'?' style="background:none;max-width:140px"':''}><img data-mid="${md.id}" alt=""></button>`;
+  if(u&&md.type==='video')return `<button class="bm" data-open="${md.id}"><video data-mid="${md.id}" muted preload="metadata" playsinline></video><span class="play">${ic('play','fill')}</span></button>`;
+  if(u)return `<button class="bfile" data-open="${md.id}">${ic(TYPE_IC[md.type]||'file')}<span>${esc(md.name)}</span><small>${fmtSize(md.file.size)}</small></button>`;
+  return `<button class="bfile off" data-open="${md.id}">${ic('eyeoff')}<span>${TYPE_LABEL[md.type]||'Media'} ${md.status==='missing'?'missing from export':'not exported'}</span></button>`;
+}
+function msgHTML(i,opt={}){
+  const C=S.chat,m=C.msgs[i],p=C.msgs[i-1];let h='';
+  if(!opt.noSep&&(!p||p.day!==m.day)){const d=new Date(m.t);h+=`<div class="dsep"><span>${WDF[d.getDay()].slice(0,3)}, ${fmtDate(d)}</span></div>`}
+  if(m.type==='system')return `<div class="row" data-i="${i}">${h}<div class="sysm"><span>${esc(m.text)}</span></div></div>`;
+  const cont=p&&p.s===m.s&&p.type!=='system'&&p.day===m.day&&m.t-p.t<5*6e4;
+  const me=m.s===C.meIdx,q=opt.q??CV.q;
+  let body='';
+  if(!me&&!cont&&C.senders.length>2)body+=`<div class="nm" style="color:${colorOf(m.s)}">${esc(m.s>=0?C.senders[m.s]:'')}</div>`;
+  if(m.media!=null)body+=mediaBubble(C.media[m.media]);
+  if(m.type==='deleted')body+=`<span class="tx">${m.s===C.meIdx?'You deleted this message':'This message was deleted'}</span>`;
+  else if(m.loc){const mm=m.loc.match(/q=(-?[\d.]+),(-?[\d.]+)/);body+=`<a class="loc" href="${esc(m.loc)}" target="_blank" rel="noopener">${ic('pin')} ${mm?`${(+mm[1]).toFixed(4)}, ${(+mm[2]).toFixed(4)}`:'Location'}</a>`}
+  else if(m.text)body+=`<span class="tx">${richText(m.text,q)}</span>`;
+  body+=`<span class="meta">${m.edited?'edited · ':''}${fmtTime(new Date(m.t))}</span>`;
+  return `<div class="row" data-i="${i}">${h}<div class="msg ${me?'me':'them'}${cont?' cont':''}"><div class="bub${m.type==='deleted'?' del':''}">${body}</div></div></div>`;
+}
+function rangeHTML(s,e,opt){let h='';for(let i=s;i<e;i++)h+=msgHTML(i,opt);return h}
+function renderChat(){
+  const v=$('#v-chat'),C=S.chat;
+  v.innerHTML=`<div class="card ctools"><div class="sbox">${ic('search')}<input id="cq" placeholder="Search all messages…" autocomplete="off"></div><span id="chits" class="mut num" style="font-size:12px;min-width:44px;text-align:center"></span><button class="ibtn" id="cPrev" title="Older match">${ic('up')}</button><button class="ibtn" id="cNext" title="Newer match">${ic('down')}</button><input type="date" class="date" id="cDate" min="${C.stats.dayKeys[0]}" max="${C.stats.dayKeys[C.stats.dayKeys.length-1]}" title="Jump to date"></div>
+  <div class="cscroll" id="cscroll"><div class="sent" id="cTop"></div><div id="clist"></div><div class="sent" id="cBot"></div></div>`;
+  const sc=$('#cscroll');
+  const io=new IntersectionObserver(es=>{if(CV.lock)return;for(const e of es){if(!e.isIntersecting)continue;if(e.target.id==='cTop')extendUp();else extendDown()}},{root:sc,rootMargin:'800px 0px'});
+  io.observe($('#cTop'));io.observe($('#cBot'));
+  const doSearch=debounce(()=>{const q=$('#cq').value.trim();CV.q=q.length>=2?q:'';const ql=CV.q.toLowerCase();CV.hits=CV.q?C.msgs.filter(m=>m.text&&m.text.toLowerCase().includes(ql)).map(m=>m.i):[];CV.hi=CV.hits.length-1;updHits();if(CV.hits.length)chatShow(CV.hits[CV.hi]);else chatRender(CV.s,CV.e,true)},250);
+  $('#cq').addEventListener('input',doSearch);
+  $('#cq').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();stepHit(e.shiftKey?1:-1)}});
+  $('#cPrev').onclick=()=>stepHit(-1);$('#cNext').onclick=()=>stepHit(1);
+  $('#cDate').onchange=e=>{const k=e.target.value;if(!k)return;const ks=C.stats.dayKeys;let lo=0,hi=ks.length-1;while(lo<hi){const mid=(lo+hi)>>1;if(ks[mid]<k)lo=mid+1;else hi=mid}chatShow(C.stats.days.get(ks[lo]).first,'start')};
+  const n=C.msgs.length;chatRender(Math.max(0,n-CHUNK),n);requestAnimationFrame(()=>{sc.scrollTop=sc.scrollHeight});
+  if(CV.pending!=null){const p=CV.pending;CV.pending=null;setTimeout(()=>chatShow(p),30)}
+}
+function updHits(){$('#chits').textContent=CV.q?(CV.hits.length?`${CV.hi+1}/${CV.hits.length}`:'0'):''}
+function stepHit(d){if(!CV.hits.length)return;CV.hi=(CV.hi+d+CV.hits.length)%CV.hits.length;updHits();chatShow(CV.hits[CV.hi])}
+function chatRender(s,e,keep){const cl=$('#clist'),sc=$('#cscroll');const top=sc.scrollTop;CV.s=s;CV.e=e;cl.innerHTML=rangeHTML(s,e);hydrate(cl);if(keep)sc.scrollTop=top}
+function extendUp(){if(CV.s<=0)return;const sc=$('#cscroll'),cl=$('#clist'),ns=Math.max(0,CV.s-CHUNK),before=sc.scrollHeight;
+  // the old first row may now need its separator recomputed — it already uses the global previous message, so it's correct
+  cl.insertAdjacentHTML('afterbegin',rangeHTML(ns,CV.s));CV.s=ns;sc.scrollTop+=sc.scrollHeight-before;hydrate(cl);
+  const extra=CV.e-CV.s-MAXR;if(extra>0){const rows=cl.children;for(let k=0;k<extra;k++)rows[rows.length-1].remove();CV.e-=extra}}
+function extendDown(){const n=S.chat.msgs.length;if(CV.e>=n)return;const sc=$('#cscroll'),cl=$('#clist'),ne=Math.min(n,CV.e+CHUNK);cl.insertAdjacentHTML('beforeend',rangeHTML(CV.e,ne));CV.e=ne;hydrate(cl);
+  const extra=CV.e-CV.s-MAXR;if(extra>0){const rows=cl.children,h=rows[extra].offsetTop-rows[0].offsetTop;for(let k=0;k<extra;k++)rows[0].remove();CV.s+=extra;sc.scrollTop-=h}}
+function chatShow(i,align){
+  const n=S.chat.msgs.length,sc=$('#cscroll');if(!sc){CV.pending=i;return}
+  CV.lock=true;
+  if(i<CV.s||i>=CV.e||!$(`.row[data-i="${i}"]`,sc))chatRender(Math.max(0,i-CHUNK/2|0),Math.min(n,i+CHUNK/2|0));
+  else chatRender(CV.s,CV.e,true);
+  const el=$(`.row[data-i="${i}"]`,sc);
+  if(el){sc.scrollTop=align==='start'?el.offsetTop-8:el.offsetTop-sc.clientHeight/2+el.offsetHeight/2;el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1700)}
+  setTimeout(()=>{CV.lock=false},120);
+}
+function goChat(i){if(!S.rendered.chat){CV.pending=i;switchTab('chat');return}switchTab('chat');requestAnimationFrame(()=>chatShow(i))}
+function goChatSearch(q){switchTab('chat');const inp=$('#cq');inp.value=q;inp.dispatchEvent(new Event('input'))}
+
+/* ---------- MEDIA ---------- */
+const MV={type:'all',sender:'all',q:'',sort:'new',sel:new Set(),selMode:false,list:[]};
+const TYPE_ORDER=['image','video','audio','doc','contact','sticker'];
+function renderMedia(){
+  const C=S.chat,v=$('#v-media'),cnt={};C.media.forEach(m=>{cnt[m.type]=(cnt[m.type]||0)+1});
+  const off=C.media.filter(m=>!m.file).length;
+  v.innerHTML=`<div class="card mtools"><div class="sbox">${ic('search')}<input id="mq" placeholder="Search captions, chat context, tags, notes, dates…" autocomplete="off"></div>
+  <select id="mSender"><option value="all">Everyone</option>${C.order.map(s=>`<option value="${s}">${esc(sname(s))}</option>`).join('')}</select>
+  <select id="mSort"><option value="new">Newest first</option><option value="old">Oldest first</option></select>
+  <button class="btn" id="mSel">${ic('check')} Select</button></div>
+  <div class="chips" id="mTypes"><button class="chip on" data-t="all">All <small>${C.media.length}</small></button>${TYPE_ORDER.filter(t=>cnt[t]).map(t=>`<button class="chip" data-t="${t}">${ic(TYPE_IC[t])}${TYPE_PL[t]} <small>${cnt[t]}</small></button>`).join('')}${off?`<button class="chip" data-t="off">${ic('eyeoff')}Not exported <small>${off}</small></button>`:''}</div>
+  <div id="mInfo" class="mut" style="font-size:12px"></div>
+  <div class="mgrid" id="mGrid"></div>
+  <div id="selbarWrap" hidden><div class="selbar"><b id="selN" class="num">0 selected</b><span id="selSz" class="mut num" style="font-size:12px"></span><button class="btn" id="selAll">All</button><button class="btn" id="selNone">Clear</button><button class="btn pri" id="selDl">${ic('download')} Download .zip</button></div></div>`;
+  $('#mq').addEventListener('input',debounce(e=>{MV.q=e.target.value.trim().toLowerCase();mediaApply()},150));
+  $('#mSender').onchange=e=>{MV.sender=e.target.value;mediaApply()};
+  $('#mSort').onchange=e=>{MV.sort=e.target.value;mediaApply()};
+  $('#mTypes').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;MV.type=b.dataset.t;$$('#mTypes .chip').forEach(c=>c.classList.toggle('on',c===b));mediaApply()};
+  $('#mSel').onclick=()=>setSelMode(!MV.selMode);
+  $('#selAll').onclick=()=>{MV.list.forEach(id=>{if(C.media[id].file)MV.sel.add(id)});syncSel()};
+  $('#selNone').onclick=()=>{MV.sel.clear();syncSel()};
+  $('#selDl').onclick=downloadSelected;
+  $('#mGrid').addEventListener('click',e=>{const t=e.target.closest('.tile');if(!t)return;const id=+t.dataset.id;if(MV.selMode){if(!C.media[id].file)return;MV.sel.has(id)?MV.sel.delete(id):MV.sel.add(id);syncSel()}else openLB(id,MV.list)});
+  if(MV.q){$('#mq').value=MV.q}
+  mediaApply();
+}
+function setMediaQuery(q){MV.q=q.toLowerCase();const i=$('#mq');if(i){i.value=q;mediaApply()}}
+function mediaFiltered(){
+  const C=S.chat,toks=MV.q.split(/\s+/).filter(Boolean);
+  let l=C.media.filter(m=>(MV.type==='all'||(MV.type==='off'?!m.file:m.type===MV.type))&&(MV.sender==='all'||m.s===+MV.sender)&&(!toks.length||(st=>toks.every(t=>st.includes(t)))(searchText(m))));
+  l.sort((a,b)=>MV.sort==='new'?b.t-a.t||b.id-a.id:a.t-b.t||a.id-b.id);return l.map(m=>m.id);
+}
+function tileHTML(md){
+  const d=md.t?fmtDateS(new Date(md.t)):'undated',n=noteOf(md),tagN=(n?.tags?.length||0)+(n?.note?1:0);
+  let th;
+  if(md.file&&(md.type==='image'||md.type==='sticker'))th=`<img data-mid="${md.id}" alt="" loading="lazy"${md.type==='sticker'?' style="object-fit:contain;padding:12px"':''}>`;
+  else if(md.file&&md.type==='video')th=`<video data-mid="${md.id}" muted preload="metadata" playsinline></video><span class="play">${ic('play','fill')}</span>`;
+  else if(md.file)th=`${ic(TYPE_IC[md.type])}<span class="fn">${esc(md.name)}</span>`;
+  else th=`${ic('eyeoff')}<span class="fn">${TYPE_LABEL[md.type]} · not exported</span>`;
+  const cls=md.file?(md.type==='image'||md.type==='video'||md.type==='sticker'?'':md.type==='contact'?'contact':md.type==='audio'?'audio':'doc'):'off';
+  return `<div class="tile ${cls}${MV.sel.has(md.id)?' sel':''}" data-id="${md.id}" title="${esc(md.caption||md.kw.join(', ')||md.name||'')}"><div class="th">${th}</div>${md.type!=='image'?`<span class="ty">${TYPE_LABEL[md.type]}</span>`:''}<div class="tcap"><span class="dot" style="background:${colorOf(md.s)}"></span><span>${d}${md.caption?' · '+esc(md.caption):''}</span>${tagN?`<span style="margin-left:auto;display:flex;opacity:.8">${ic('tag')}</span>`:''}</div><span class="tick">${ic('check')}</span></div>`;
+}
+function mediaApply(){
+  const C=S.chat;MV.list=mediaFiltered();const g=$('#mGrid');if(!g)return;
+  g.innerHTML=MV.list.length?MV.list.map(id=>tileHTML(C.media[id])).join(''):`<div class="empty" style="grid-column:1/-1">Nothing matches${MV.q?` “${esc(MV.q)}”`:''}.</div>`;
+  hydrate(g);const ok=MV.list.filter(id=>C.media[id].file).length;
+  $('#mInfo').textContent=`${MV.list.length} item${MV.list.length===1?'':'s'}${MV.q?` matching “${MV.q}”`:''} · ${ok} downloadable`;
+}
+function setSelMode(on){MV.selMode=on;$('#mGrid').classList.toggle('selmode',on);$('#mSel').classList.toggle('on',on);$('#mSel').innerHTML=on?`${ic('x')} Done`:`${ic('check')} Select`;$('#selbarWrap').hidden=!on;if(!on)MV.sel.clear();syncSel()}
+function syncSel(){const C=S.chat;$$('#mGrid .tile').forEach(t=>t.classList.toggle('sel',MV.sel.has(+t.dataset.id)));const sz=[...MV.sel].reduce((a,id)=>a+(C.media[id].file?.size||0),0);$('#selN').textContent=`${MV.sel.size} selected`;$('#selSz').textContent=MV.sel.size?fmtSize(sz):'';$('#selDl').disabled=!MV.sel.size}
+async function downloadSelected(){
+  const C=S.chat,items=[...MV.sel].map(id=>C.media[id]).filter(m=>m.file).sort((a,b)=>a.t-b.t).map(m=>({name:m.name,blob:m.file,date:m.t?new Date(m.t):null}));
+  if(!items.length)return;
+  if(items.length===1&&DL_OK.test(items[0].name)){await saveBlob(items[0].name,items[0].blob);return}
+  loader(`Packing 0 / ${items.length}…`);await nextFrame();
+  try{const z=await makeZip(items,(i,n)=>loader(`Packing ${i} / ${n}…`));loader(false);await saveBlob(`${C.title.replace(/[^\p{L}\d _-]+/gu,'').trim()||'chat'} media (${items.length}).zip`,z)}
+  catch(e){loader(false);toast('Could not build zip: '+e.message,true)}
+}
+
+/* ---------- LIGHTBOX ---------- */
+const LB={list:[],k:0};
+function openLB(id,list){
+  const C=S.chat;LB.list=list&&list.includes(id)?list:C.media.filter(m=>m.mi>=0).sort((a,b)=>a.t-b.t).map(m=>m.id);
+  LB.k=LB.list.indexOf(id);if(LB.k<0){LB.list=[id];LB.k=0}
+  $('#lb').hidden=false;document.body.classList.add('noscroll');renderLB();
+}
+function closeLB(){const lb=$('#lb');if(lb.hidden)return;$$('video,audio',lb).forEach(m=>{try{m.pause()}catch{}});lb.hidden=true;lb.innerHTML='';if(!$('#drawer'))document.body.classList.remove('noscroll')}
+async function renderLB(){
+  const C=S.chat,md=C.media[LB.list[LB.k]],lb=$('#lb'),u=urlFor(md),d=md.t?new Date(md.t):null,n=noteOf(md)||{tags:[],note:''};
+  let pv;
+  if(!md.file)pv=`<div class="bigfile">${ic('eyeoff')}<div><b style="color:var(--tx)">${TYPE_LABEL[md.type]} ${md.status==='missing'?'missing from export':'not included in export'}</b><br><span style="font-size:12px">${md.status==='missing'?esc(md.name):'Export again with “Include media” to see it here. Context and tags still work.'}</span></div></div>`;
+  else if(md.type==='image'||md.type==='sticker')pv=`<img src="${u}" alt="">`;
+  else if(md.type==='video')pv=`<video src="${u}" controls playsinline></video>`;
+  else if(md.type==='audio')pv=`<div class="bigfile">${ic('music')}<audio src="${u}" controls></audio><span style="font-size:12px">${esc(md.name)}</span></div>`;
+  else if(md.type==='contact')pv=`<div class="vcard" id="vcBox"><div class="bigfile">${ic('card')}</div></div>`;
+  else if(/^(txt|csv|json|md|log)$/.test(extOf(md.name)))pv=`<div class="docprev" id="docBox">Loading…</div>`;
+  else pv=`<div class="bigfile">${ic('file')}<div><b style="color:var(--tx)">${esc(md.name)}</b><br><span style="font-size:12px">${fmtSize(md.file.size)} · no in-browser preview for this type</span></div></div>`;
+  const ctxRow=j=>{const m=C.msgs[j];return `<div class="cx${m.s===C.meIdx?' me':''}"><small>${esc(sname(m.s))} · ${fmtTime(new Date(m.t))}</small>${richText(m.text.length>220?m.text.slice(0,220)+'…':m.text,'')}</div>`};
+  const kws=[...md.kw,...md.auto];
+  lb.innerHTML=`<div class="lb-main"><span class="lb-count num">${LB.k+1} / ${LB.list.length}</span><button class="ibtn lb-close" id="lbX" title="Close (Esc)">${ic('x')}</button>${LB.list.length>1?`<button class="lb-nav l" id="lbP">${ic('left')}</button><button class="lb-nav r" id="lbN">${ic('right')}</button>`:''}${pv}</div>
+  <aside class="lb-side">
+    <div><div class="who" style="margin-bottom:6px">${md.s>=0?avatar(md.s,28):''}<div style="min-width:0"><b style="font-size:13.5px">${esc(md.s>=0?sname(md.s):'Not referenced in chat')}</b><small>${d?`${WDF[d.getDay()]}, ${fmtDate(d)}${md.mi>=0?' · '+fmtTime(d):''}`:'undated'}</small></div></div>
+    <div class="lb-name">${esc(md.name||TYPE_LABEL[md.type])}${md.file?' · '+fmtSize(md.file.size):''}</div></div>
+    ${md.caption?`<div class="lb-cap">${richText(md.caption,'')}</div>`:''}
+    ${md.mi>=0?`<div><h4>Around this ${(TYPE_LABEL[md.type]||'file').toLowerCase()}</h4><div class="ctx">${md.ctx.before.map(ctxRow).join('')}<div class="cx-here">${esc(sname(md.s))} sent this</div>${md.ctx.after.map(ctxRow).join('')}${!md.ctx.before.length&&!md.ctx.after.length?'<div class="dim" style="font-size:12px">No messages within a day of this one.</div>':''}</div></div>`:''}
+    ${kws.length?`<div><h4>Auto keywords</h4><div class="chips">${kws.map(k=>`<button class="chip" data-kw="${esc(k)}">${esc(k)}</button>`).join('')}</div></div>`:''}
+    <div><h4>Your tags</h4><div class="chips" id="lbTags">${(n.tags||[]).map(t=>`<span class="chip on">${esc(t)}<button class="x" data-rmtag="${esc(t)}">${ic('x')}</button></span>`).join('')||'<span class="dim" style="font-size:12px">No tags yet</span>'}</div><input class="tagin" id="lbTagIn" placeholder="Add a tag, press Enter" autocomplete="off"></div>
+    <div><h4>Note</h4><textarea id="lbNote" placeholder="What’s this about? Notes are searchable.">${esc(n.note||'')}</textarea></div>
+    <div class="lb-acts">${md.mi>=0?`<button class="btn" data-goto="${md.mi}">${ic('msg')} Open in chat</button>`:''}${md.file?`<button class="btn pri" id="lbDl">${ic('download')} Download</button>`:''}</div>
+  </aside>`;
+  $('#lbX').onclick=closeLB;$('#lbP')&&($('#lbP').onclick=()=>navLB(-1));$('#lbN')&&($('#lbN').onclick=()=>navLB(1));
+  $('#lbDl')&&($('#lbDl').onclick=async()=>{if(DL_OK.test(md.name))await saveBlob(md.name,md.file);else{const z=await makeZip([{name:md.name,blob:md.file,date:d}]);await saveBlob(md.name.replace(/\.[^.]+$/,'')+'.zip',z)}});
+  $('#lbTagIn').onkeydown=e=>{if(e.key==='Enter'){const t=e.target.value.trim().toLowerCase();if(t){const cur=noteOf(md)||{tags:[],note:''};if(!cur.tags.includes(t))saveNote(md,{tags:[...cur.tags,t],note:cur.note});renderLB().then(()=>$('#lbTagIn').focus())}}};
+  $('#lbNote').oninput=debounce(e=>{const cur=noteOf(md)||{tags:[]};saveNote(md,{tags:cur.tags||[],note:e.target.value})},400);
+  lb.onclick=e=>{const r=e.target.closest('[data-rmtag]');if(r){const cur=noteOf(md);saveNote(md,{tags:cur.tags.filter(t=>t!==r.dataset.rmtag),note:cur.note});renderLB()}
+    const k=e.target.closest('[data-kw]');if(k){closeLB();switchTab('media');setMediaQuery(k.dataset.kw)}
+    if(e.target.classList.contains('lb-main'))closeLB()};
+  if(md.type==='contact'&&md.file){const cards=md.vcf||parseVcf(await md.file.text());const box=$('#vcBox');if(box)box.innerHTML=cards.map(c=>`<div class="vc"><b>${esc(c.name||'Unnamed contact')}</b>${c.org?`<div class="mut">${esc(c.org)}</div>`:''}${c.tels.map(t=>`<div class="num">${esc(t)}</div>`).join('')}${c.emails.map(t=>`<div>${esc(t)}</div>`).join('')}</div>`).join('')||'<div class="vc">Empty contact file</div>'}
+  if($('#docBox')){const t=await md.file.slice(0,20000).text();$('#docBox').textContent=t+(md.file.size>20000?'\n…':'')}
+}
+function navLB(d){$$('#lb video,#lb audio').forEach(m=>{try{m.pause()}catch{}});LB.k=(LB.k+d+LB.list.length)%LB.list.length;renderLB()}
+function saveNote(it,{tags,note}){
+  const C=S.chat,rec={key:C.id+'|'+it.mk,chat:C.id,mk:it.mk,tags,note};C.notes.set(it.mk,rec);
+  DB.putNote(rec).catch(()=>toast('Couldn’t save the tag offline',true));
+  if(it.url){const el=S.rendered.links&&$(`.lk[data-lid="${it.id}"]`);if(el)el.outerHTML=linkCardHTML(it);return}
+  if(S.rendered.media){const t=$(`#mGrid .tile[data-id="${it.id}"]`);if(t){t.outerHTML=tileHTML(it);hydrate($('#mGrid'))}}
+}
+document.addEventListener('keydown',e=>{
+  if(!$('#lb').hidden&&!/INPUT|TEXTAREA/.test(document.activeElement?.tagName)){if(e.key==='Escape')closeLB();else if(e.key==='ArrowLeft')navLB(-1);else if(e.key==='ArrowRight')navLB(1);return}
+  if(e.key==='Escape'){if(!$('#lb').hidden)closeLB();else if($('#drawer'))closeDrawer();else $('.ov')?.remove()}
+});
+/* touch swipe in lightbox */
+let tx0=null;$('#lb').addEventListener('touchstart',e=>{if(e.target.closest('.lb-main'))tx0=e.touches[0].clientX},{passive:true});
+$('#lb').addEventListener('touchend',e=>{if(tx0==null)return;const dx=e.changedTouches[0].clientX-tx0;tx0=null;if(Math.abs(dx)>60)navLB(dx<0?1:-1)},{passive:true});
+
+/* =================== v0.2 modules =================== */
+IC.copy='<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>';
+IC.ext='<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>';
+IC.sparkle='<path d="M12 3l1.9 5.8L20 10.7l-5.1 3.3L16.5 20 12 16.4 7.5 20l1.6-6L4 10.7l6.1-1.9z"/>';
+const safeName=t=>(t||'').replace(/[^\p{L}\d _-]+/gu,'').trim()||'chat';
+const dkOf=t=>dayKey(new Date(t));
+function hlAll(s,toks){if(!toks.length)return s;return s.replace(new RegExp(toks.map(t=>reEsc(esc(t))).join('|'),'gi'),x=>`<mark>${x}</mark>`)}
+function ctxRowG(j){const C=S.chat,m=C.msgs[j];return `<div class="cx${m.s===C.meIdx?' me':''}"><small>${esc(sname(m.s))} · ${fmtTime(new Date(m.t))}</small>${richText(m.text.length>220?m.text.slice(0,220)+'…':m.text,'')}</div>`}
+function tagEditorHTML(n,pre){return `<div><h4>Your tags</h4><div class="chips">${(n.tags||[]).map(t=>`<span class="chip on">${esc(t)}<button class="x" data-rmtag="${esc(t)}">${ic('x')}</button></span>`).join('')||'<span class="dim" style="font-size:12px">No tags yet</span>'}</div><input class="tagin" id="${pre}TagIn" placeholder="Add a tag, press Enter" autocomplete="off"></div><div><h4>Note</h4><textarea id="${pre}Note" class="ta" placeholder="What’s this about? Notes are searchable.">${esc(n.note||'')}</textarea></div>`}
+
+/* ---------- group chat: leaderboard + reply matrix ---------- */
+const OV={sort:'msgs',dir:1};
+const BOARD_COLS=[['msgs','Msgs'],['share','Share'],['words','Words'],['wpm','W/msg'],['media','Media'],['starts','Starts'],['reply','Reply'],['night','Night'],[null,'24h rhythm']];
+function boardVal(s,k){const st=S.chat.stats,p=st.per[s];switch(k){case'msgs':case'share':return p.msgs;case'words':return p.words;case'wpm':return p.words/(p.textMsgs||1);case'media':return p.media;case'starts':return p.starts;case'reply':{const m=median(p.replies);return m==null?1e15:m}case'night':return p.night/(p.msgs||1)}return 0}
+function spark(s){const h=S.chat.stats.per[s].hours,mx=Math.max(1,...h);return `<svg width="96" height="22" viewBox="0 0 96 22" style="display:block;margin-left:auto">${h.map((v,i)=>`<rect x="${i*4}" y="${22-Math.max(1,v/mx*21)}" width="3" height="${Math.max(1,v/mx*21)}" rx="1" fill="${colorOf(s)}" opacity="${v?1:.18}"/>`).join('')}</svg>`}
+function boardHTML(){
+  const C=S.chat,st=C.stats,k=OV.sort;
+  const rows=C.senders.map((_,i)=>i).filter(s=>st.per[s].msgs>0).sort((a,b)=>(boardVal(b,k)-boardVal(a,k))*OV.dir);
+  return `<table class="board"><thead><tr><th>Person</th>${BOARD_COLS.map(([key,l])=>`<th${key?` data-k="${key}"`:''} class="${key===k?'on':''}">${l}${key===k?(OV.dir>0?' ↓':' ↑'):''}</th>`).join('')}</tr></thead><tbody>${rows.map((s,r)=>{const p=st.per[s],md=median(p.replies);return `<tr><td><div class="pn"><span class="num dim" style="width:20px">${r+1}</span>${avatar(s,22)}<b title="${esc(fullName(s))}">${esc(sname(s))}</b></div></td><td>${fmtN(p.msgs)}</td><td>${pct(p.msgs,st.total)}%</td><td>${fmtN(p.words)}</td><td>${(p.words/(p.textMsgs||1)).toFixed(1)}</td><td>${fmtN(p.media)}</td><td>${fmtN(p.starts)}</td><td>${md==null?'—':fmtDur(md)}</td><td>${pct(p.night,p.msgs)}%</td><td>${spark(s)}</td></tr>`}).join('')}</tbody></table>`;
+}
+function wireBoard(){const b=$('#board');if(!b)return;b.onclick=e=>{const th=e.target.closest('th[data-k]');if(!th)return;const k=th.dataset.k;if(OV.sort===k)OV.dir*=-1;else{OV.sort=k;OV.dir=k==='reply'?-1:1}b.innerHTML=boardHTML()}}
+function matrixHTML(){
+  const C=S.chat,st=C.stats,top=C.order.filter(s=>st.per[s].msgs>0).slice(0,10);let mx=1,best=null;
+  top.forEach(r=>top.forEach(c=>{if(r===c)return;mx=Math.max(mx,st.mat[r][c]);const pair=st.mat[r][c]+st.mat[c][r];if(r<c&&(!best||pair>best[2]))best=[r,c,pair]}));
+  const cell=(r,c)=>{if(r===c)return '<td style="background:rgba(255,255,255,.03)"></td>';const v=st.mat[r][c],o=v?.15+.85*Math.sqrt(v/mx):0;return `<td style="background:${colorOf(r)};box-shadow:inset 0 0 0 40px rgba(12,14,19,${(1-o).toFixed(2)})" data-tip="<b>${esc(sname(r))} → ${esc(sname(c))}</b>${v} repl${v===1?'y':'ies'}">${v||''}</td>`};
+  return `<div class="card"><div class="row-h"><h3>Who replies to whom</h3><span class="dim" style="font-size:11.5px">row replied to column · top ${top.length} by messages</span></div><div class="mx"><table><tr><th></th>${top.map(c=>`<th class="c">${esc(sname(c))}</th>`).join('')}</tr>${top.map(r=>`<tr><th style="text-align:right">${esc(sname(r))}</th>${top.map(c=>cell(r,c)).join('')}</tr>`).join('')}</table></div>${best&&best[2]?`<div class="trend-sum">${esc(sname(best[0]))} and ${esc(sname(best[1]))} reply to each other the most: ${fmtN(best[2])} times.</div>`:''}</div>`;
+}
+function groupFacts(facts){
+  const C=S.chat,st=C.stats,ids=C.senders.map((_,i)=>i).filter(s=>st.per[s].msgs>0);if(!ids.length)return;
+  const arg=(f,pool=ids)=>pool.length?pool.reduce((b,s)=>f(s)>f(b)?s:b,pool[0]):null;
+  const talk=arg(s=>st.per[s].msgs);facts.push([sname(talk),`most talkative · ${pct(st.per[talk].msgs,st.total)}% of messages`]);
+  const starter=arg(s=>st.per[s].starts);facts.push([sname(starter),`starts the most conversations (${fmtN(st.per[starter].starts)})`]);
+  const rp=ids.filter(s=>st.per[s].replies.length>=5);const fast=arg(s=>-median(st.per[s].replies),rp);if(fast!=null)facts.push([sname(fast),`fastest replier · median ${fmtDur(median(st.per[fast].replies))}`]);
+  const np=ids.filter(s=>st.per[s].msgs>=20);const owl=arg(s=>st.per[s].night/st.per[s].msgs,np);if(owl!=null&&st.per[owl].night)facts.push([sname(owl),`night owl · ${pct(st.per[owl].night,st.per[owl].msgs)}% after midnight`]);
+  const quiet=arg(s=>-st.per[s].msgs);facts.push([sname(quiet),`quietest · ${fmtN(st.per[quiet].msgs)} messages`]);
+}
+function hourSeries(){const C=S.chat,st=C.stats,top=C.order.slice(0,6),out=top.map(s=>({c:colorOf(s),l:sname(s),v:st.per[s].hours}));if(C.order.length>6){const v=Array(24).fill(0);C.order.slice(6).forEach(s=>st.per[s].hours.forEach((x,i)=>v[i]+=x));out.push({c:'#5b6274',l:'Others',v})}return out}
+
+/* ---------- relationship trends ---------- */
+const TR={metric:'share',smooth:false};
+const TR_M={share:'Message share',starts:'Who starts',reply:'Reply time',wpm:'Words / message',balance:'Balance'};
+function monthKeys(){const st=S.chat.stats,f=new Date(st.first),l=new Date(st.last),out=[];for(let y=f.getFullYear(),m=f.getMonth();y<l.getFullYear()||(y===l.getFullYear()&&m<=l.getMonth());m===11?(y++,m=0):m++)out.push(`${y}-${pad(m+1)}`);return out}
+function smooth(v){return v.map((x,i)=>{if(x==null)return null;const w=[v[i-1],x,v[i+1]].filter(y=>y!=null);return w.reduce((a,b)=>a+b,0)/w.length})}
+function trFmt(v){if(v==null)return '—';if(TR.metric==='reply')return fmtDur(v*6e4);if(TR.metric==='wpm')return v.toFixed(1);return Math.round(v)+'%'}
+function drawTrends(){
+  const C=S.chat,st=C.stats,el=$('#trends');if(!el)return;
+  const months=monthKeys(),grp=C.senders.length>2,ppl=C.order.filter(s=>st.per[s].msgs>0).slice(0,grp?5:2);
+  const val=(mo,s)=>{if(!mo)return null;switch(TR.metric){case'share':return mo.per[s]/mo.n*100;case'starts':{const t=mo.starts.reduce((a,b)=>a+b,0);return t?mo.starts[s]/t*100:null}case'reply':{const m=median(mo.rep[s]);return m==null?null:m/6e4}case'wpm':return mo.tm[s]?mo.wc[s]/mo.tm[s]:null}return null};
+  let series;
+  if(TR.metric==='balance')series=[{c:'#fbbf24',l:grp?'Evenness (all members)':'Balance (100 = perfectly even)',v:months.map(k=>{const mo=st.months.get(k);if(!mo)return null;if(!grp&&ppl.length===2)return 100-Math.abs(mo.per[ppl[0]]-mo.per[ppl[1]])/mo.n*100;const sh=mo.per.filter(x=>x>0).map(x=>x/mo.n),n=C.senders.length;return n>1?-sh.reduce((a,p)=>a+p*Math.log(p),0)/Math.log(n)*100:100})}];
+  else series=ppl.map(s=>({c:colorOf(s),l:sname(s),v:months.map(k=>val(st.months.get(k),s))}));
+  if(TR.smooth)series.forEach(sr=>sr.v=smooth(sr.v));
+  const sum=series.slice(0,2).map(sr=>{const nn=sr.v.filter(v=>v!=null);if(nn.length<4)return '';const a=nn.slice(0,3),b=nn.slice(-3),av=x=>x.reduce((p,q)=>p+q,0)/x.length;return `<b style="color:${sr.c}">${esc(sr.l)}</b> ${trFmt(av(a))} → ${trFmt(av(b))}`}).filter(Boolean);
+  el.innerHTML=`<div class="row-h"><h3>Relationship trends</h3><div class="chips">${Object.entries(TR_M).map(([k,l])=>`<button class="chip${k===TR.metric?' on':''}" data-m="${k}">${l}</button>`).join('')}<button class="chip${TR.smooth?' on':''}" data-sm>3-month smoothing</button></div></div>${lineChart(months,series)}<div class="chips" style="margin-top:8px">${series.map(s=>`<span class="chip"><span class="dot" style="background:${s.c}"></span>${esc(s.l)}</span>`).join('')}<span class="chip" style="border-style:dashed"><span class="dot" style="background:rgba(255,255,255,.25);border-radius:2px"></span>monthly volume · dashed = across quiet months</span></div>${sum.length?`<div class="trend-sum">First 3 active months → last 3: ${sum.join(' · ')}</div>`:''}<div class="dim" style="font-size:11.5px;margin-top:4px">${{share:'Share of each month’s messages.',starts:'Share of conversations started after a 6h+ gap.',reply:'Median time to reply when the other side spoke last (log scale).',wpm:'Average words per text message.',balance:grp?'How evenly the group talks: 100 means everyone talks equally.':'100 means both sent the same number of messages that month.'}[TR.metric]} Months with few messages are noisy; the grey bars show volume.</div>`;
+  el.onclick=e=>{const m=e.target.closest('[data-m]');if(m){TR.metric=m.dataset.m;drawTrends()}if(e.target.closest('[data-sm]')){TR.smooth=!TR.smooth;drawTrends()}};
+}
+function lineChart(months,series){
+  const W=1000,H=230,L=46,R=12,T=12,B=28,iw=W-L-R,ih=H-T-B,n=months.length,x=i=>L+(n<=1?iw/2:i*iw/(n-1));
+  const all=series.flatMap(s=>s.v.filter(v=>v!=null)),st=S.chat.stats;let y,ticks,fmt;
+  if(TR.metric==='reply'){const tr=v=>Math.log10(Math.max(v,.1));const lo=tr(Math.min(1,...all)),hi=tr(Math.max(10,...all));y=v=>T+ih-(tr(v)-lo)/((hi-lo)||1)*ih;ticks=[.5,1,5,15,60,240,1440,10080].filter(t=>tr(t)>=lo-.01&&tr(t)<=hi+.01);fmt=t=>fmtDur(t*6e4)}
+  else if(TR.metric==='wpm'){const hi=Math.max(2,...all)*1.12;y=v=>T+ih-v/hi*ih;const step=hi>40?10:hi>16?5:hi>8?2:1;ticks=[];for(let t=0;t<=hi;t+=step)ticks.push(t);fmt=t=>String(t)}
+  else{y=v=>T+ih-v/100*ih;ticks=[0,25,50,75,100];fmt=t=>t+'%'}
+  let s='';const vmax=Math.max(1,...months.map(k=>st.months.get(k)?.n||0));
+  ticks.forEach(t=>{const yy=y(t);s+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="rgba(255,255,255,${t===50&&TR.metric!=='reply'&&TR.metric!=='wpm'?.14:.06})"${t===50?' stroke-dasharray="4 4"':''}/><text x="${L-8}" y="${yy+3}" text-anchor="end">${fmt(t)}</text>`});
+  months.forEach((k,i)=>{const mo=st.months.get(k),[yy,mm]=k.split('-');if(mo){const bh=Math.max(2,mo.n/vmax*34);s+=`<rect x="${x(i)-Math.max(1.5,Math.min(6,iw/n/2-1))}" y="${T+ih-bh}" width="${Math.max(3,Math.min(12,iw/n-2))}" height="${bh}" rx="1.5" fill="rgba(255,255,255,.07)"/>`}if(mm==='01'||i===0)s+=`<text x="${x(i)}" y="${H-8}" text-anchor="${i===0?'start':'middle'}">${i===0&&mm!=='01'?MON[+mm-1]+' ':''}${yy}</text>`});
+  series.forEach(sr=>{let d='',g='',pen=false,last=null;sr.v.forEach((v,i)=>{if(v==null){pen=false;return}const P=x(i).toFixed(1)+' '+y(v).toFixed(1);if(!pen&&last)g+=`M${last}L${P}`;d+=(pen?'L':'M')+P;pen=true;last=P});if(g)s+=`<path d="${g}" fill="none" stroke="${sr.c}" stroke-width="1.6" stroke-dasharray="3 5" opacity=".45"/>`;s+=`<path d="${d}" fill="none" stroke="${sr.c}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;sr.v.forEach((v,i)=>{if(v!=null&&(n<=48||(sr.v[i-1]==null&&sr.v[i+1]==null)))s+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="${sr.c}" stroke="#07090d" stroke-width="1.5"/>`})});
+  const w=n<=1?iw:iw/(n-1);
+  months.forEach((k,i)=>{const mo=st.months.get(k);if(!mo)return;const[yy,mm]=k.split('-');s+=`<rect x="${x(i)-w/2}" y="${T}" width="${w}" height="${ih}" fill="transparent" data-month="${k}" data-tip="<b>${MONF[+mm-1]} ${yy}</b>${series.map(sr=>`${esc(sr.l)}: ${trFmt(sr.v[i])}`).join('<br>')}<br>${mo.n} msgs"/>`});
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${s}</svg>`;
+}
+
+/* ---------- links vault ---------- */
+const LV={kind:'all',sender:'all',q:'',sort:'new',lim:300};
+function linkText(x){const n=noteOf(x);return x.base+(n?' '+(n.tags||[]).join(' ')+' '+(n.note||''):'')}
+function linkPath(x){try{const u=new URL(x.url);return (u.hostname.replace(/^www\./,'')+u.pathname+(u.search&&u.search.length<48?u.search:'')).replace(/\/$/,'')}catch{return x.url}}
+function linkCardHTML(x){
+  const C=S.chat,K=LINK_KINDS[x.kind],n=noteOf(x),lastB=x.ctx.before[x.ctx.before.length-1],near=x.own||(lastB!=null?C.msgs[lastB].text:'');
+  return `<div class="lk" data-lid="${x.id}"><div class="lk-h"><span class="lk-ic" style="background:${K[1]}">${ic(K[2])}</span><div style="min-width:0"><b>${K[0]}</b><small>${esc(x.host)}</small></div><span class="dt">${fmtDateS(new Date(x.t))}</span></div><div class="lk-u">${esc(linkPath(x))}</div>${near?`<div class="lk-c">${x.own?'':'<span class="dim">context · </span>'}${esc(near.slice(0,220))}</div>`:''}<div class="lk-f"><span class="dot" style="background:${colorOf(x.s)}"></span><span>${esc(sname(x.s))}</span>${n&&((n.tags||[]).length||n.note)?`<span style="display:flex;color:var(--a)">${ic('tag')}</span>`:''}<span class="sp"></span><button class="ibtn" data-copy="${x.id}" title="Copy link">${ic('copy')}</button><a class="ibtn" href="${esc(x.url)}" target="_blank" rel="noopener" title="Open link">${ic('ext')}</a></div></div>`;
+}
+function renderLinks(){
+  const C=S.chat,v=$('#v-links'),cnt={};C.links.forEach(l=>cnt[l.kind]=(cnt[l.kind]||0)+1);
+  if(!C.links.length){v.innerHTML=`<div class="card empty">No links were shared in this chat.</div>`;return}
+  v.innerHTML=`<div class="card mtools"><div class="sbox">${ic('search')}<input id="lq" placeholder="Search links, sites, messages, tags…" autocomplete="off"></div>
+  <select id="lSender"><option value="all">Everyone</option>${C.order.map(s=>`<option value="${s}">${esc(sname(s))}</option>`).join('')}</select>
+  <select id="lSort"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="site">By site</option></select>
+  <button class="btn" id="lCsv" title="Export the filtered list">${ic('download')} CSV</button></div>
+  <div class="chips" id="lKinds"><button class="chip on" data-k="all">All <small>${C.links.length}</small></button>${Object.keys(LINK_KINDS).filter(k=>cnt[k]).sort((a,b)=>cnt[b]-cnt[a]).map(k=>`<button class="chip" data-k="${k}">${ic(LINK_KINDS[k][2])}${LINK_KINDS[k][0]} <small>${cnt[k]}</small></button>`).join('')}</div>
+  <div id="lInfo" class="mut" style="font-size:12px"></div><div class="lgrid" id="lGrid"></div><div id="lMore" style="text-align:center"></div>`;
+  $('#lq').value=LV.q;$('#lSender').value=LV.sender;$('#lSort').value=LV.sort;
+  $('#lq').addEventListener('input',debounce(e=>{LV.q=e.target.value.trim().toLowerCase();LV.lim=300;linksApply()},150));
+  $('#lSender').onchange=e=>{LV.sender=e.target.value;linksApply()};$('#lSort').onchange=e=>{LV.sort=e.target.value;linksApply()};
+  $('#lKinds').onclick=e=>{const b=e.target.closest('[data-k]');if(!b)return;LV.kind=b.dataset.k;$$('#lKinds .chip').forEach(c=>c.classList.toggle('on',c===b));LV.lim=300;linksApply()};
+  $('#lCsv').onclick=linksCsv;
+  $('#lGrid').addEventListener('click',e=>{const cp=e.target.closest('[data-copy]');if(cp){copyText(C.links[+cp.dataset.copy].url);return}if(e.target.closest('a'))return;const card=e.target.closest('.lk');if(card)openLinkDrawer(+card.dataset.lid)});
+  $('#lMore').onclick=e=>{if(e.target.closest('button')){LV.lim+=300;linksApply()}};
+  linksApply();
+}
+function linksFiltered(){const C=S.chat,toks=LV.q.split(/\s+/).filter(Boolean);const l=C.links.filter(x=>(LV.kind==='all'||x.kind===LV.kind)&&(LV.sender==='all'||x.s===+LV.sender)&&(!toks.length||(t=>toks.every(k=>t.includes(k)))(linkText(x))));l.sort(LV.sort==='old'?(a,b)=>a.t-b.t||a.id-b.id:LV.sort==='site'?(a,b)=>a.host.localeCompare(b.host)||b.t-a.t:(a,b)=>b.t-a.t||b.id-a.id);return l}
+function linksApply(){const g=$('#lGrid');if(!g)return;const l=linksFiltered();g.innerHTML=l.length?l.slice(0,LV.lim).map(linkCardHTML).join(''):`<div class="empty" style="grid-column:1/-1">Nothing matches${LV.q?` “${esc(LV.q)}”`:''}.</div>`;$('#lInfo').textContent=`${fmtN(l.length)} link${l.length===1?'':'s'}${LV.q?` matching “${LV.q}”`:''} · ${new Set(l.map(x=>x.host)).size} sites`;$('#lMore').innerHTML=l.length>LV.lim?`<button class="btn">Show more (${fmtN(l.length-LV.lim)} left)</button>`:''}
+async function copyText(t){try{await navigator.clipboard.writeText(t);toast('Link copied')}catch{toast('Copy is blocked here. Long-press the link instead.',true)}}
+function linksCsv(){const C=S.chat,rows=[['date','time','sender','kind','site','url','message','context','tags','note']];linksFiltered().forEach(x=>{const d=new Date(x.t),n=noteOf(x)||{};rows.push([dayKey(d),fmtTime(d),fullName(x.s),LINK_KINDS[x.kind][0],x.host,x.url,x.own,[...x.ctx.before,...x.ctx.after].map(j=>C.msgs[j].text).join(' | '),(n.tags||[]).join('; '),n.note||''])});const csv='﻿'+rows.map(r=>r.map(v=>{v=String(v??'');return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n');saveBlob(`${safeName(C.title)} links.csv`,new Blob([csv],{type:'text/csv'}))}
+function openLinkDrawer(id){
+  const C=S.chat,x=C.links[id],K=LINK_KINDS[x.kind],n=noteOf(x)||{tags:[],note:''},d=new Date(x.t),keep=$('#drawer .db')?.scrollTop;closeDrawer();
+  const sc=document.createElement('div');sc.className='scrim';sc.onclick=closeDrawer;const dr=document.createElement('div');dr.className='drawer';dr.id='drawer';
+  dr.innerHTML=`<div class="dh"><span class="lk-ic" style="background:${K[1]}">${ic(K[2])}</span><div><b>${K[0]} · ${esc(x.host)}</b><div class="mut" style="font-size:12px">${esc(sname(x.s))} · ${WDF[d.getDay()].slice(0,3)}, ${fmtDate(d)} · ${fmtTime(d)}</div></div><button class="ibtn" id="drX">${ic('x')}</button></div>
+  <div class="db" style="padding:14px;display:grid;gap:16px;align-content:start"><a href="${esc(x.url)}" target="_blank" rel="noopener" style="word-break:break-all;font-size:13px">${esc(x.url)}</a>
+  ${x.own?`<div class="lb-cap">${richText(x.own,'')}</div>`:''}
+  <div><h4>Around this link</h4><div class="ctx">${x.ctx.before.map(ctxRowG).join('')}<div class="cx-here">${esc(sname(x.s))} shared this</div>${x.ctx.after.map(ctxRowG).join('')}${!x.ctx.before.length&&!x.ctx.after.length?'<div class="dim" style="font-size:12px">No other messages within a day of this one.</div>':''}</div></div>
+  ${tagEditorHTML(n,'ln')}
+  <div class="lb-acts"><button class="btn" data-goto="${x.mi}">${ic('msg')} Open in chat</button><button class="btn" id="lnCopy">${ic('copy')} Copy</button><a class="btn pri" href="${esc(x.url)}" target="_blank" rel="noopener">${ic('ext')} Open link</a></div></div>`;
+  document.body.append(sc,dr);document.body.classList.add('noscroll');if(keep)$('.db',dr).scrollTop=keep;
+  $('#drX').onclick=closeDrawer;$('#lnCopy').onclick=()=>copyText(x.url);
+  $('#lnTagIn').onkeydown=e=>{if(e.key==='Enter'){const t=e.target.value.trim().toLowerCase();const cur=noteOf(x)||{tags:[],note:''};if(t&&!cur.tags.includes(t))saveNote(x,{tags:[...cur.tags,t],note:cur.note});openLinkDrawer(id);$('#lnTagIn').focus()}};
+  $('#lnNote').oninput=debounce(e=>{const cur=noteOf(x)||{tags:[]};saveNote(x,{tags:cur.tags||[],note:e.target.value})},400);
+  dr.addEventListener('click',e=>{const r=e.target.closest('[data-rmtag]');if(r){const cur=noteOf(x);saveNote(x,{tags:cur.tags.filter(t=>t!==r.dataset.rmtag),note:cur.note});openLinkDrawer(id)}});
+}
+
+/* ---------- search everywhere ---------- */
+const SE={type:'all',sender:'all',from:'',to:'',lim:{}};
+const SE_T={all:'All',msg:'Messages',media:'Media',link:'Links',note:'Notes & tags'};
+function openSearch(){
+  if(!S.chat||$('#sov'))return;const C=S.chat;SE.lim={};
+  const o=document.createElement('div');o.className='ov sov';o.id='sov';
+  o.innerHTML=`<div class="spanel"><div class="sp-top"><div class="sbox">${ic('search')}<input id="seQ" placeholder="Search messages, media, links, notes…" autocomplete="off"><button class="ibtn" id="seX" title="Close (Esc)">${ic('x')}</button></div>
+  <div class="sp-f"><div class="chips" id="seT">${Object.entries(SE_T).map(([t,l])=>`<button class="chip${t===SE.type?' on':''}" data-t="${t}">${l}</button>`).join('')}</div>
+  <select id="seS"><option value="all">Everyone</option>${C.order.map(s=>`<option value="${s}">${esc(sname(s))}</option>`).join('')}</select>
+  <input type="date" class="date" id="seF" title="From" min="${C.stats.dayKeys[0]}" max="${C.stats.dayKeys.at(-1)}"><span class="dim">→</span><input type="date" class="date" id="seTo" title="To" min="${C.stats.dayKeys[0]}" max="${C.stats.dayKeys.at(-1)}"></div></div>
+  <div class="sp-res" id="seR"></div></div>`;
+  document.body.appendChild(o);document.body.classList.add('noscroll');
+  $('#seS').value=SE.sender;$('#seF').value=SE.from;$('#seTo').value=SE.to;
+  const run=debounce(runSearch,140);
+  $('#seQ').addEventListener('input',()=>{SE.lim={};run()});
+  $('#seT').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;SE.type=b.dataset.t;$$('#seT .chip').forEach(c=>c.classList.toggle('on',c===b));runSearch()};
+  $('#seS').onchange=e=>{SE.sender=e.target.value;runSearch()};$('#seF').onchange=e=>{SE.from=e.target.value;runSearch()};$('#seTo').onchange=e=>{SE.to=e.target.value;runSearch()};
+  $('#seX').onclick=closeSearch;
+  o.addEventListener('click',e=>{if(e.target===o){closeSearch();return}
+    const more=e.target.closest('[data-more]');if(more){SE.lim[more.dataset.more]=300;runSearch();return}
+    const gi=e.target.closest('[data-gi]');if(gi){closeSearch();goChat(+gi.dataset.gi);return}
+    const gm=e.target.closest('[data-gm]');if(gm){closeSearch();openLB(+gm.dataset.gm);return}
+    const gl=e.target.closest('[data-gl]');if(gl){closeSearch();openLinkDrawer(+gl.dataset.gl);return}});
+  $('#seQ').addEventListener('keydown',e=>{if(e.key==='Enter'){const f=$('#seR .sr');if(f)f.click()}});
+  runSearch();setTimeout(()=>$('#seQ').focus(),20);
+}
+function closeSearch(){$('#sov')?.remove();if($('#lb').hidden&&!$('#drawer'))document.body.classList.remove('noscroll')}
+function runSearch(){
+  const C=S.chat,R=$('#seR');if(!R)return;const q=$('#seQ').value.trim().toLowerCase();
+  if(q.length<2){R.innerHTML=`<div class="empty">Type at least 2 characters. Every word must match.<br><span class="dim" style="font-size:12px">Open search anytime with <span class="kbd">Ctrl/⌘ K</span> or <span class="kbd">/</span></span></div>`;return}
+  const toks=q.split(/\s+/).filter(Boolean),match=t=>toks.every(k=>t.includes(k));
+  const okS=s=>SE.sender==='all'||s===+SE.sender,okD=day=>(!SE.from||day>=SE.from)&&(!SE.to||day<=SE.to);
+  const want=t=>SE.type==='all'||SE.type===t,lim=k=>SE.lim[k]||(SE.type==='all'?6:60);
+  const secs=[];
+  if(want('msg')){let n=0;const hits=[],L=lim('msg');for(let i=C.msgs.length-1;i>=0;i--){const m=C.msgs[i];if(m.type==='system'||!m.text||!okS(m.s)||!okD(m.day))continue;const lc=m.lc||(m.lc=m.text.toLowerCase());if(match(lc)){n++;if(hits.length<L)hits.push(i)}}
+    secs.push(['msg','Messages',n,hits.map(i=>{const m=C.msgs[i],d=new Date(m.t),lc=m.lc,ix=Math.max(0,lc.indexOf(toks[0])),st=Math.max(0,ix-50);return `<button class="sr" data-gi="${i}">${avatar(m.s,30)}<span class="b"><div>${st?'…':''}${hlAll(esc(m.text.slice(st,st+180)),toks)}</div><small>${esc(sname(m.s))} · ${fmtDate(d)} · ${fmtTime(d)}</small></span></button>`})])}
+  if(want('media')){const l=C.media.filter(md=>okS(md.s)&&okD(md.t?dkOf(md.t):'')&&match(searchText(md))).sort((a,b)=>b.t-a.t);
+    secs.push(['media','Media',l.length,l.slice(0,lim('media')).map(md=>{const th=md.file&&(md.type==='image'||md.type==='sticker')?`<img src="${urlFor(md)}" alt="">`:md.file&&md.type==='video'?`<video src="${urlFor(md)}#t=0.1" muted preload="metadata" playsinline></video>`:ic(md.file?TYPE_IC[md.type]:'eyeoff');return `<button class="sr" data-gm="${md.id}"><span class="th">${th}</span><span class="b"><div>${hlAll(esc(md.caption||md.kw.join(', ')||md.name||TYPE_LABEL[md.type]),toks)}</div><small>${TYPE_LABEL[md.type]} · ${esc(md.s>=0?sname(md.s):'unreferenced')} · ${md.t?fmtDate(new Date(md.t)):'undated'}</small></span></button>`})])}
+  if(want('link')){const l=C.links.filter(x=>okS(x.s)&&okD(x.day)&&match(linkText(x))).sort((a,b)=>b.t-a.t);
+    secs.push(['link','Links',l.length,l.slice(0,lim('link')).map(x=>{const K=LINK_KINDS[x.kind];return `<button class="sr" data-gl="${x.id}"><span class="th" style="background:${K[1]};color:#06080c">${ic(K[2])}</span><span class="b"><div>${hlAll(esc(linkPath(x)),toks)}${x.own?` <span class="mut">· ${hlAll(esc(x.own.slice(0,90)),toks)}</span>`:''}</div><small>${K[0]} · ${esc(sname(x.s))} · ${fmtDate(new Date(x.t))}</small></span></button>`})])}
+  if(want('note')){const items=[...C.media,...C.links].filter(it=>{const n=noteOf(it);if(!n||!((n.tags||[]).length||n.note))return false;return okS(it.s)&&match(((n.tags||[]).join(' ')+' '+(n.note||'')).toLowerCase())});
+    secs.push(['note','Notes & tags',items.length,items.slice(0,lim('note')).map(it=>{const n=noteOf(it),isL=!!it.url;return `<button class="sr" ${isL?`data-gl="${it.id}"`:`data-gm="${it.id}"`}><span class="th">${ic('tag')}</span><span class="b"><div>${(n.tags||[]).map(t=>`<span class="chip on" style="height:20px;font-size:11px">${hlAll(esc(t),toks)}</span>`).join(' ')} ${hlAll(esc(n.note||''),toks)}</div><small>on ${isL?'link · '+esc(it.host):TYPE_LABEL[it.type]} · ${esc(sname(it.s))} · ${it.t?fmtDate(new Date(it.t)):''}</small></span></button>`})])}
+  const total=secs.reduce((a,s)=>a+s[2],0);
+  R.innerHTML=total?secs.filter(s=>s[2]).map(([k,l,n,rows])=>`<div class="sp-sec"><h4><span>${l} · ${fmtN(n)}</span>${n>rows.length?`<button class="chip" data-more="${k}" style="height:22px">Show ${n>300?'300':'all'}</button>`:''}</h4>${rows.join('')}</div>`).join(''):`<div class="empty">No results for “${esc(q)}”${SE.sender!=='all'||SE.from||SE.to?' with these filters':''}.</div>`;
+}
+document.addEventListener('keydown',e=>{
+  if($('#sov')&&e.key==='Escape'){e.stopImmediatePropagation();closeSearch();return}
+  if(!S.chat||$('#appv').hidden)return;
+  const typing=/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch()}
+  else if(e.key==='/'&&!typing&&$('#lb').hidden){e.preventDefault();openSearch()}
+  else if(S.tab==='wrapped'&&!typing&&$('#lb').hidden&&!$('.ov')){if(e.key==='ArrowRight')wrStep(1);if(e.key==='ArrowLeft')wrStep(-1)}
+},true);
+$('#btnSearch').onclick=openSearch;
+
+/* ---------- Wrapped cards (canvas 1080×1920) ---------- */
+const WR={k:0,hide:false};
+const FF='ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+const CW=1080,CH=1920,MX=84;
+function hexA(c,a){if(c[0]==='#'){const n=parseInt(c.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}return c.replace('hsl(','hsla(').replace(')',`,${a})`)}
+function wrD(){
+  const C=S.chat,st=C.stats,grp=C.senders.length>2,act=C.order.filter(s=>st.per[s].msgs>0);
+  const nm=s=>{if(s===C.meIdx)return 'You';if(!WR.hide)return C.senders[s];const r=act.indexOf(s);if(grp)return `Person ${r+1}`;return C.meIdx>=0?'Them':(r===0?'Person A':'Person B')};
+  const other=act.find(s=>s!==C.meIdx);
+  const title=WR.hide?(grp?'the group':(C.meIdx>=0?'them':'this chat')):(grp?C.title:(other!=null?C.senders[other]:C.title));
+  return{C,st,grp,act,nm,title,cols:[colorOf(act[0]??0),colorOf(act[1]??act[0]??0),'#60a5fa']};
+}
+function cbg(x,D,k){
+  x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.fillStyle='#07090d';x.fillRect(0,0,CW,CH);
+  const spots=[[[160,240],[980,820],[380,1760]],[[920,260],[120,980],[800,1700]],[[540,180],[1000,1300],[80,1500]]][k%3];
+  spots.forEach(([bx,by],i)=>{const g=x.createRadialGradient(bx,by,0,bx,by,760);g.addColorStop(0,hexA(D.cols[i],.30));g.addColorStop(1,hexA(D.cols[i],0));x.fillStyle=g;x.fillRect(0,0,CW,CH)});
+  x.strokeStyle='rgba(255,255,255,.035)';x.lineWidth=1;for(let yy=0;yy<CH;yy+=64){x.beginPath();x.moveTo(0,yy);x.lineTo(CW,yy);x.stroke()}
+  // brand
+  x.fillStyle=gradH(x,MX,MX+46);rr(x,MX,118,46,46,14);x.fill();x.strokeStyle='#07090d';x.lineWidth=6;x.beginPath();x.arc(MX+23,141,10,0,Math.PI*2);x.stroke();
+  txt(x,'THREADLINE',MX+66,152,`800 30px ${FF}`,'rgba(255,255,255,.8)',{sp:6});
+  txt(x,`${k+1} / ${WR_CARDS.length}`,CW-MX,152,`600 28px ${FF}`,'rgba(255,255,255,.45)',{al:'right'});
+  const st=D.st;txt(x,`${fmtDate(new Date(st.first))} – ${fmtDate(new Date(st.last))}`,MX,CH-96,`500 28px ${FF}`,'rgba(255,255,255,.42)');
+  txt(x,'made on-device · threadline',CW-MX,CH-96,`500 28px ${FF}`,'rgba(255,255,255,.3)',{al:'right'});
+}
+function gradH(x,a,b){const g=x.createLinearGradient(a,0,b,0);g.addColorStop(0,'#2dd4bf');g.addColorStop(.5,'#60a5fa');g.addColorStop(1,'#a78bfa');return g}
+function rr(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()}
+function txt(x,t,X,Y,font,fill,o={}){x.font=font;x.fillStyle=fill;x.textAlign=o.al||'left';x.textBaseline='alphabetic';if(o.sp){let cx=X;if(o.al==='right'){cx=X-[...t].reduce((a,c)=>a+x.measureText(c).width+o.sp,0)}x.textAlign='left';for(const c of t){x.fillText(c,cx,Y);cx+=x.measureText(c).width+o.sp}return}x.fillText(t,X,Y)}
+function fit(x,t,max,size,weight){let s=size;do{x.font=`${weight} ${s}px ${FF}`;if(x.measureText(t).width<=max)break;s-=4}while(s>28);return s}
+function wrapL(x,t,max,font,maxLines=3){x.font=font;const w=t.split(/\s+/);const out=[];let cur='';for(const word of w){const tr=cur?cur+' '+word:word;if(x.measureText(tr).width>max&&cur){out.push(cur);cur=word}else cur=tr}if(cur)out.push(cur);if(out.length>maxLines){out.length=maxLines;out[maxLines-1]=out[maxLines-1].replace(/.{0,2}$/,'')+'…'}return out}
+function kicker(x,t,Y){txt(x,t.toUpperCase(),MX,Y,`800 32px ${FF}`,'rgba(255,255,255,.55)',{sp:5})}
+function bigStat(x,num,label,Y,col){txt(x,num,MX,Y,`800 150px ${FF}`,col||'#fff');txt(x,label,MX+4,Y+58,`500 38px ${FF}`,'rgba(255,255,255,.6)')}
+const WR_CARDS=[
+function intro(x,D,k){cbg(x,D,k);const st=D.st;
+  kicker(x,D.grp?'Your group':'Your chat with',520);
+  const s=fit(x,D.title,CW-2*MX,150,850),lines=wrapL(x,D.title,CW-2*MX,`850 ${s}px ${FF}`,2);lines.forEach((l,i)=>txt(x,l,MX,520+s*1.02*(i+1),`850 ${s}px ${FF}`,gradH(x,MX,CW-MX)));
+  const y0=520+s*1.02*lines.length+90;
+  const span=Math.round((keyDate(st.dayKeys.at(-1))-keyDate(st.dayKeys[0]))/DAY)+1;
+  bigStat(x,fmtN(st.total),'messages',y0+180);
+  bigStat(x,fmtN(st.dayKeys.length),`days you actually talked, out of ${fmtN(span)}`,y0+430,'#5eead4');
+  bigStat(x,fmtN(D.C.media.length+D.C.links.length),`photos, videos, files & links`,y0+680,'#c4b5fd');
+},
+function talk(x,D,k){cbg(x,D,k);const st=D.st;kicker(x,'Who talks more',420);
+  if(!D.grp&&D.act.length>=2){const[a,b]=D.act,pa=st.per[a].msgs,pb=st.per[b].msgs,tot=pa+pb;
+    [[a,pa,560],[b,pb,1010]].forEach(([s,v,Y])=>{const c=colorOf(s);txt(x,D.nm(s),MX,Y,`700 ${fit(x,D.nm(s),CW-2*MX,60,700)}px ${FF}`,'#fff');txt(x,`${Math.round(v/tot*100)}%`,MX-6,Y+230,`900 240px ${FF}`,c);rr(x,MX,Y+280,CW-2*MX,26,13);x.fillStyle='rgba(255,255,255,.08)';x.fill();rr(x,MX,Y+280,Math.max(26,(CW-2*MX)*v/tot),26,13);x.fillStyle=c;x.fill();txt(x,`${fmtN(v)} messages · ${fmtN(st.per[s].words)} words`,MX,Y+360,`500 34px ${FF}`,'rgba(255,255,255,.6)')});
+    const big=pa>=pb?a:b,r=Math.max(pa,pb)/Math.max(1,Math.min(pa,pb));
+    const line=r>=1.15?`${D.nm(big)} ${big===D.C.meIdx?'send':'sends'} ${r.toFixed(1)}× as many messages.`:'Almost perfectly even. Rare.';
+    wrapL(x,line,CW-2*MX,`700 52px ${FF}`,3).forEach((l,i)=>txt(x,l,MX,1520+i*66,`700 52px ${FF}`,'#fff'));
+  }else{const top=D.act.slice(0,6),mx=st.per[top[0]].msgs;top.forEach((s,i)=>{const Y=560+i*190,c=colorOf(s),v=st.per[s].msgs;txt(x,`${i+1}`,MX,Y+10,`800 44px ${FF}`,'rgba(255,255,255,.35)');txt(x,D.nm(s),MX+70,Y,`700 ${fit(x,D.nm(s),620,52,700)}px ${FF}`,'#fff');txt(x,`${pct(v,st.total)}%`,CW-MX,Y,`800 56px ${FF}`,c,{al:'right'});rr(x,MX+70,Y+34,CW-2*MX-70,20,10);x.fillStyle='rgba(255,255,255,.07)';x.fill();rr(x,MX+70,Y+34,Math.max(20,(CW-2*MX-70)*v/mx),20,10);x.fillStyle=c;x.fill()});
+    txt(x,`${fmtN(D.act.length)} people · ${fmtN(st.total)} messages`,MX,1720,`600 40px ${FF}`,'rgba(255,255,255,.6)')}
+},
+function busy(x,D,k){cbg(x,D,k);const st=D.st,top=st.top[0];kicker(x,'Busiest day',480);if(!top)return;const dt=keyDate(top[0]);
+  txt(x,`${dt.getDate()} ${MON[dt.getMonth()]}`,MX-8,720,`900 230px ${FF}`,gradH(x,MX,CW-MX));
+  txt(x,`${WDF[dt.getDay()]}, ${dt.getFullYear()}`,MX,800,`600 50px ${FF}`,'rgba(255,255,255,.7)');
+  txt(x,fmtN(top[1].n),MX,1010,`900 170px ${FF}`,'#fff');txt(x,'messages in one day',MX+4,1070,`500 40px ${FF}`,'rgba(255,255,255,.6)');
+  const mo=[...st.months.values()].sort((a,b)=>b.n-a.n)[0],[my,mm]=mo.key.split('-'),wd=st.wd.indexOf(Math.max(...st.wd));
+  [[`Peak month`,`${MONF[+mm-1]} ${my} · ${fmtN(mo.n)} msgs`],[`Favourite day`,`${['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][wd]}s`],[`Second busiest`,st.top[1]?`${fmtDate(keyDate(st.top[1][0]))} · ${st.top[1][1].n}`:'—']].forEach(([l,v],i)=>{const Y=1250+i*150;rr(x,MX,Y-76,CW-2*MX,124,24);x.fillStyle='rgba(255,255,255,.05)';x.fill();txt(x,l.toUpperCase(),MX+32,Y-26,`700 24px ${FF}`,'rgba(255,255,255,.45)',{sp:3});txt(x,v,MX+32,Y+22,`700 40px ${FF}`,'#fff')});
+},
+function clock(x,D,k){cbg(x,D,k);const st=D.st,HS=hourSeries().map(s=>({...s,l:s.l==='You'?'You':s.l})),hmax=Math.max(1,...st.hours),cx=540,cy=930,r0=170,len=270;
+  kicker(x,'When you talk',420);
+  x.strokeStyle='rgba(255,255,255,.08)';x.lineWidth=2;x.beginPath();x.arc(cx,cy,r0-24,0,Math.PI*2);x.stroke();x.beginPath();x.arc(cx,cy,r0+len+20,0,Math.PI*2);x.stroke();
+  for(let h=0;h<24;h++){const a=h/24*Math.PI*2-Math.PI/2;let r=r0;x.lineCap='butt';x.lineWidth=26;
+    x.strokeStyle='rgba(255,255,255,.06)';x.beginPath();x.moveTo(cx+Math.cos(a)*r0,cy+Math.sin(a)*r0);x.lineTo(cx+Math.cos(a)*(r0+len),cy+Math.sin(a)*(r0+len));x.stroke();
+    for(const sr of HS){const v=sr.v[h];if(!v)continue;const L=v/hmax*len;x.strokeStyle=sr.c;x.beginPath();x.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);x.lineTo(cx+Math.cos(a)*(r+L),cy+Math.sin(a)*(r+L));x.stroke();r+=L}}
+  [[0,'12am'],[6,'6am'],[12,'12pm'],[18,'6pm']].forEach(([h,l])=>{const a=h/24*Math.PI*2-Math.PI/2;txt(x,l,cx+Math.cos(a)*(r0+len+62),cy+Math.sin(a)*(r0+len+62)+12,`700 30px ${FF}`,'rgba(255,255,255,.5)',{al:'center'})});
+  const pk=st.hours.indexOf(Math.max(...st.hours));txt(x,fmtHour(pk),cx,cy+24,`900 96px ${FF}`,'#fff',{al:'center'});txt(x,'peak hour',cx,cy+70,`600 28px ${FF}`,'rgba(255,255,255,.5)',{al:'center'});
+  const night=st.per.reduce((a,p)=>a+p.night,0);const ids=D.act.filter(s=>st.per[s].msgs>=10);const owl=ids.length?ids.reduce((b,s)=>st.per[s].night/st.per[s].msgs>st.per[b].night/st.per[b].msgs?s:b,ids[0]):null;
+  txt(x,`${pct(night,st.total)}%`,MX,1500,`900 130px ${FF}`,'#c4b5fd');txt(x,'of messages sent between 12am and 5am',MX+4,1556,`500 36px ${FF}`,'rgba(255,255,255,.6)');
+  if(owl!=null&&st.per[owl].night)txt(x,`Night owl: ${D.nm(owl)}`,MX,1660,`700 46px ${FF}`,'#fff');
+  let lx=MX;HS.slice(0,4).forEach(sr=>{const nm=sr.l==='Others'?'Others':sr.l;const label=WR.hide&&nm!=='You'&&nm!=='Others'?D.nm(D.act[HS.indexOf(sr)]):nm;x.fillStyle=sr.c;x.beginPath();x.arc(lx+10,1736,10,0,Math.PI*2);x.fill();txt(x,label,lx+30,1747,`600 30px ${FF}`,'rgba(255,255,255,.7)');x.font=`600 30px ${FF}`;lx+=x.measureText(label).width+76});
+},
+function words(x,D,k){cbg(x,D,k);const st=D.st;kicker(x,'Your words',420);
+  const comb=new Map(),own=new Map();D.act.slice(0,8).forEach(s=>st.per[s].wmap.forEach((v,k)=>{comb.set(k,(comb.get(k)||0)+v);const o=own.get(k);if(!o||v>o[1])own.set(k,[s,v])}));
+  const top=[...comb].sort((a,b)=>b[1]-a[1]).slice(0,9);
+  if(!top.length){txt(x,'Not many words.',MX,900,`800 90px ${FF}`,'#fff');return}
+  let Y=600;top.forEach(([w,c],i)=>{const size=Math.round(150-i*11);const f=fit(x,w,CW-2*MX-200,size,850);txt(x,w,MX,Y,`850 ${f}px ${FF}`,i===0?gradH(x,MX,CW-MX):colorOf(own.get(w)[0]));txt(x,`${fmtN(c)}×`,CW-MX,Y,`600 34px ${FF}`,'rgba(255,255,255,.5)',{al:'right'});Y+=f*.98+22});
+  txt(x,'Colour shows who says it most.',MX,1740,`500 32px ${FF}`,'rgba(255,255,255,.45)');
+},
+function emoji(x,D,k){cbg(x,D,k);const st=D.st;kicker(x,'Top emoji',420);
+  const comb=new Map();st.per.forEach(p=>p.emo.forEach((v,k)=>comb.set(k,(comb.get(k)||0)+v)));const top=[...comb].sort((a,b)=>b[1]-a[1]).slice(0,6);
+  if(!top.length){txt(x,'Zero emoji.',MX,860,`900 120px ${FF}`,'#fff');txt(x,'Words only. Respect.',MX,960,`600 50px ${FF}`,'rgba(255,255,255,.6)');return}
+  top.forEach(([e,c],i)=>{const col=i%3,row=Math.floor(i/3),X=MX+col*((CW-2*MX)/3)+(CW-2*MX)/6,Y=720+row*400;x.font=`${i===0?200:160}px ${FF}`;x.textAlign='center';x.fillStyle='#fff';x.fillText(e,X,Y);txt(x,`${fmtN(c)}×`,X,Y+86,`700 40px ${FF}`,'rgba(255,255,255,.6)',{al:'center'})});
+  const favs=D.act.slice(0,D.grp?3:2).map(s=>{const f=[...st.per[s].emo].sort((a,b)=>b[1]-a[1])[0];return f?[D.nm(s),f[0]]:null}).filter(Boolean);
+  favs.forEach(([n,e],i)=>{txt(x,n==='You'?'Your favourite':`${n}’s favourite`,MX,1500+i*92,`600 40px ${FF}`,'rgba(255,255,255,.65)');x.font=`64px ${FF}`;x.textAlign='right';x.fillText(e,CW-MX,1506+i*92)});
+},
+function rhythm(x,D,k){cbg(x,D,k);const st=D.st;kicker(x,'The rhythm',420);
+  const blocks=[];
+  blocks.push([`${st.streak.len} day${st.streak.len===1?'':'s'}`,'longest streak',st.streak.from?`${fmtDate(keyDate(st.streak.from))} → ${fmtDate(keyDate(st.streak.to))}`:'','#5eead4']);
+  if(st.silence.len)blocks.push([`${fmtN(st.silence.len)} days`,'longest silence',`${fmtDate(keyDate(st.silence.from))} → ${fmtDate(keyDate(st.silence.to))}`,'#c4b5fd']);
+  const rp=D.act.filter(s=>st.per[s].replies.length>=3);if(rp.length){const f=rp.reduce((b,s)=>median(st.per[s].replies)<median(st.per[b].replies)?s:b,rp[0]);blocks.push([fmtDur(median(st.per[f].replies)),`${D.nm(f)} ${f===D.C.meIdx?'reply':'replies'} fastest`,'median reply time','#fbbf24'])}
+  const sp=D.act.filter(s=>st.per[s].starts);if(sp.length){const f=sp.reduce((b,s)=>st.per[s].starts>st.per[b].starts?s:b,sp[0]),tot=st.per.reduce((a,p)=>a+p.starts,0);blocks.push([`${pct(st.per[f].starts,tot)}%`,`of conversations started by ${D.nm(f)}`,'after a gap of 6 hours or more','#f472b6'])}
+  blocks.slice(0,4).forEach(([v,l,sub,c],i)=>{const Y=640+i*300;txt(x,v,MX,Y,`900 ${fit(x,v,CW-2*MX,150,900)}px ${FF}`,c);txt(x,l,MX+4,Y+60,`700 42px ${FF}`,'#fff');if(sub)txt(x,sub,MX+4,Y+110,`500 32px ${FF}`,'rgba(255,255,255,.5)')});
+}];
+function renderWrapped(){
+  const v=$('#v-wrapped');
+  v.innerHTML=`<div class="wr"><div class="wr-stage"><canvas id="wrC" width="${CW}" height="${CH}"></canvas><div class="wr-dots" id="wrDots"></div><button class="wr-tap l" id="wrL" aria-label="Previous card"></button><button class="wr-tap r" id="wrR" aria-label="Next card"></button></div>
+  <div class="wr-side"><div class="card"><h3 style="margin-bottom:6px">Chat Wrapped</h3><div class="mut" style="font-size:12.5px">Seven story-size cards (1080×1920) drawn on this device from your stats. No message text appears except your top words. Tap the sides of the card or use ← →.</div></div>
+  <div class="card" style="display:grid;gap:12px"><div style="display:flex;gap:8px;align-items:center"><button class="ibtn" id="wrP">${ic('left')}</button><b id="wrN" class="num" style="flex:1;text-align:center"></b><button class="ibtn" id="wrX">${ic('right')}</button></div>
+  <label class="tg"><input type="checkbox" id="wrHide"${WR.hide?' checked':''}><span></span>Hide names (for posting publicly)</label>
+  <button class="btn pri" id="wrDl" style="justify-content:center">${ic('download')} Download this card</button><button class="btn" id="wrAll" style="justify-content:center">${ic('download')} Download all ${WR_CARDS.length} (.zip)</button></div></div></div>`;
+  $('#wrL').onclick=$('#wrP').onclick=()=>wrStep(-1);$('#wrR').onclick=$('#wrX').onclick=()=>wrStep(1);
+  $('#wrHide').onchange=e=>{WR.hide=e.target.checked;drawWR()};
+  $('#wrDl').onclick=()=>$('#wrC').toBlob(b=>b&&saveBlob(`${WR.hide?'chat':safeName(S.chat.title)} wrapped ${WR.k+1}.png`,b),'image/png');
+  $('#wrAll').onclick=async()=>{loader('Drawing cards…');await nextFrame();try{const D=wrD(),items=[];for(let k=0;k<WR_CARDS.length;k++){const c=document.createElement('canvas');c.width=CW;c.height=CH;WR_CARDS[k](c.getContext('2d'),D,k);const b=await new Promise(r=>c.toBlob(r,'image/png'));items.push({name:`${String(k+1).padStart(2,'0')} ${WR_CARDS[k].name}.png`,blob:b})}const z=await makeZip(items);loader(false);await saveBlob(`${WR.hide?'chat':safeName(S.chat.title)} wrapped.zip`,z)}catch(e){loader(false);toast('Could not build cards: '+e.message,true)}};
+  drawWR();
+}
+function wrStep(d){const n=WR_CARDS.length;WR.k=Math.min(n-1,Math.max(0,WR.k+d));drawWR()}
+function drawWR(){const c=$('#wrC');if(!c)return;WR_CARDS[WR.k](c.getContext('2d'),wrD(),WR.k);$('#wrDots').innerHTML=WR_CARDS.map((_,i)=>`<i class="${i<=WR.k?'on':''}"></i>`).join('');$('#wrN').textContent=`${WR.k+1} / ${WR_CARDS.length}`}
+
+/* ---------- boot ---------- */
+renderSaved();
+</script>
+</body>
+</html>
