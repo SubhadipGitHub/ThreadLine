@@ -9,6 +9,7 @@ Audit date: 2026-11-05. State of `index.html` after the onboarding/UX overhaul.
 - Demo chat, first-run tour (10 steps, desktop and 390 px), tips, guide, ⋯ menu, "change who is You", friendly errors for a non-chat `.txt` and for a drop with no `.txt`.
 - No horizontal overflow on home or app at 390 px.
 - Zero network-capable calls in the source (grep in `CLAUDE.md` returns nothing).
+- GitHub Actions runs the syntax check, no-network grep, unit tests and smoke test on every PR. Added 2026-11-05; the smoke job is the first run on a hosted runner, so check its first result before trusting it.
 
 ## Not verified, so don't assume it works
 
