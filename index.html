@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Threadline turns a WhatsApp chat export into a timeline, calendar, stats, searchable media vault and shareable Wrapped cards. Runs entirely in your browser.">
+<meta name="theme-color" content="#07090d">
 <title>Threadline — WhatsApp Chat Analyzer</title>
 <style>
-:root{--bg:#07090d;--card:rgba(255,255,255,.035);--card2:rgba(255,255,255,.065);--line:rgba(255,255,255,.075);--line2:rgba(255,255,255,.14);--tx:#e9ecf2;--mut:#8b93a7;--dim:#5b6274;--a:#2dd4bf;--b:#a78bfa;--r:14px;--grad:linear-gradient(135deg,#2dd4bf,#60a5fa 50%,#a78bfa)}
+:root{--bg:#07090d;--card:rgba(255,255,255,.035);--card2:rgba(255,255,255,.065);--line:rgba(255,255,255,.075);--line2:rgba(255,255,255,.14);--tx:#e9ecf2;--mut:#9aa2b6;--dim:#7c859a;--a:#2dd4bf;--b:#a78bfa;--r:14px;--grad:linear-gradient(135deg,#2dd4bf,#60a5fa 50%,#a78bfa)}
 *{box-sizing:border-box;margin:0;padding:0}
 [hidden]{display:none!important}
 html,body{background:var(--bg);color:var(--tx);font:13.5px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased}
@@ -354,52 +356,198 @@ mark{background:rgba(251,191,36,.35);color:inherit;border-radius:3px;padding:0 1
   .sov{padding:8px}
   .spanel{max-height:calc(100dvh - 16px)}
 }
+
+/* ===== onboarding & help (v2) ===== */
+:focus-visible{outline:2px solid var(--a);outline-offset:2px;border-radius:6px}
+.drop:focus-within{border-color:var(--a)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.btn.lg{height:40px;padding:0 16px;font-size:13.5px;border-radius:11px}
+.btn.ghost{background:none}
+.home{place-items:start center;padding:28px 18px 60px}
+.home-in{max-width:880px}
+.home-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:34px}
+.home-top .brand{margin:0}
+.home-cta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.home-cta .or{color:var(--dim);font-size:12.5px}
+.sec{margin-top:44px}
+.sec>h2{font-size:19px;letter-spacing:-.02em;margin-bottom:4px}
+.sec>.lead{color:var(--mut);font-size:13.5px;margin-bottom:16px;max-width:640px}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;counter-reset:st}
+.step{position:relative;padding:16px 16px 16px 16px}
+.step::before{counter-increment:st;content:counter(st);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--grad);color:#06080c;font-weight:750;font-size:12.5px;margin-bottom:10px}
+.step b{display:block;font-size:14px;margin-bottom:3px}.step span{color:var(--mut);font-size:12.5px}
+.ptabs{display:inline-flex;gap:2px;padding:3px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid var(--line);margin-bottom:12px}
+.ptabs button{height:30px;padding:0 14px;border-radius:8px;color:var(--mut);font-size:12.5px;font-weight:500}
+.ptabs button[aria-selected=true]{background:rgba(255,255,255,.09);color:var(--tx);box-shadow:inset 0 0 0 1px var(--line2)}
+.olist{list-style:none;counter-reset:o;display:grid;gap:8px}
+.olist li{counter-increment:o;display:flex;gap:10px;align-items:flex-start;font-size:13.5px}
+.olist li::before{content:counter(o);flex:none;width:20px;height:20px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-size:11px;color:var(--mut);margin-top:1px}
+.olist em{font-style:normal;color:var(--a);font-weight:600}
+.note{margin-top:12px;padding:10px 12px;border-radius:11px;background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.22);color:#c3d9f7;font-size:12.5px}
+.note.warn{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.28);color:#f4dca3}
+.trust{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.trust .card b{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:13.5px}.trust .card .ic{color:var(--a)}
+.trust .card span{color:var(--mut);font-size:12.5px}
+details.faq{border-top:1px solid var(--line);padding:12px 2px}
+details.faq:last-child{border-bottom:1px solid var(--line)}
+details.faq summary{cursor:pointer;font-weight:550;font-size:13.5px;list-style:none;display:flex;justify-content:space-between;gap:10px}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::after{content:"+";color:var(--mut);font-weight:400;font-size:18px;line-height:1}
+details.faq[open] summary::after{content:"−"}
+details.faq div{color:var(--mut);font-size:13px;margin-top:8px;max-width:680px}
+details.faq div p+p{margin-top:6px}
+.saved{margin-top:26px}
+.demobar{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;padding:7px 12px;background:linear-gradient(90deg,rgba(45,212,191,.14),rgba(167,139,250,.14));border-bottom:1px solid var(--line);font-size:12.5px;text-align:center}
+body.demo{--extra:38px}
+.cscroll{height:calc(100vh - 170px - var(--extra,0px));height:calc(100dvh - 170px - var(--extra,0px))}
+.hint{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.2);font-size:12.5px;color:#cfe9e5}
+.hint b{color:var(--tx)}
+.hint .hx{margin-left:auto;flex:none;color:var(--mut)}
+.hint .hx:hover{color:var(--tx)}
+.hint p{flex:1}
+.top-r{align-items:center}
+.top-r .ibtn{display:inline-flex;align-items:center;justify-content:center;width:auto;min-width:32px;padding:0 8px;gap:6px;font-size:12px;white-space:nowrap}
+.top-r .ibtn .kbd{margin-left:2px}
+.menu{position:fixed;z-index:60;min-width:230px;padding:6px;border-radius:13px;background:#0f1218;border:1px solid var(--line2);box-shadow:0 18px 50px rgba(0,0,0,.6);animation:fade .12s}
+.menu button{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:9px;text-align:left;font-size:13px}
+.menu button:hover,.menu button:focus-visible{background:rgba(255,255,255,.07)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:5px 4px}
+.menu .danger{color:#fca5a5}
+.modal.wide{max-width:760px;max-height:88vh;display:flex;flex-direction:column;padding:0;overflow:hidden}
+.modal.wide>.mh{display:flex;align-items:center;gap:10px;padding:16px 18px 10px}
+.modal.wide>.mh h2{margin:0;flex:1}
+.gnav{display:flex;gap:6px;flex-wrap:wrap;padding:0 18px 12px;border-bottom:1px solid var(--line)}
+.gbody{overflow-y:auto;padding:16px 18px 22px}
+.gbody h3{margin:22px 0 8px}.gbody h3:first-child{margin-top:0}
+.gbody p{color:#c9cedb;font-size:13.5px;margin-bottom:8px}
+.gbody ul{margin:0 0 8px 18px;color:#c9cedb;font-size:13.5px;display:grid;gap:4px}
+.gbody dl{display:grid;grid-template-columns:minmax(120px,170px) 1fr;gap:8px 14px;font-size:13px}
+.gbody dt{font-weight:600}.gbody dd{color:var(--mut)}
+.gbody table{width:100%;border-collapse:collapse;font-size:13px}
+.gbody td{padding:6px 4px;border-top:1px solid var(--line);color:#c9cedb}.gbody td:first-child{white-space:nowrap;width:1%;padding-right:16px}
+.kbd.big{font-size:12px;padding:1px 7px;color:var(--tx)}
+.problem .ic.big{width:34px;height:34px;color:#fbbf24;margin-bottom:8px}
+.problem ul{margin:0 0 4px 18px;color:#c9cedb;font-size:13px;display:grid;gap:4px}
+.tour-blk{position:fixed;inset:0;z-index:100}
+.tour-hl{position:fixed;z-index:101;border-radius:12px;box-shadow:0 0 0 9999px rgba(4,5,8,.78),0 0 0 2px var(--a);transition:all .25s ease;pointer-events:none}
+.tour-hl.none{box-shadow:0 0 0 9999px rgba(4,5,8,.78)}
+.tour-pop{position:fixed;z-index:102;width:min(340px,calc(100vw - 24px));padding:16px;border-radius:16px;background:#0f1218;border:1px solid var(--line2);box-shadow:0 20px 60px rgba(0,0,0,.65);animation:fade .2s}
+.tour-pop.center{left:50%;top:50%;transform:translate(-50%,-50%);width:min(400px,calc(100vw - 24px))}
+.tour-pop h2{font-size:16.5px;letter-spacing:-.02em;margin-bottom:5px}
+.tour-pop p{color:#c9cedb;font-size:13px}
+.tour-pop .tf{display:flex;align-items:center;gap:8px;margin-top:14px}
+.tour-pop .dots{display:flex;gap:4px;flex:1}.tour-pop .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.18)}.tour-pop .dots i.on{background:var(--a)}
+.tour-pop .skip{color:var(--mut);font-size:12px}.tour-pop .skip:hover{color:var(--tx)}
+.callout{display:flex;gap:12px;align-items:flex-start}
+.callout .ic{color:#fbbf24;margin-top:2px}
+@media (max-width:720px){
+  .steps,.trust{grid-template-columns:1fr}
+  .home{padding:18px 14px 50px}
+  .home-top{margin-bottom:22px}
+  .top-r .ibtn .lbl,.top-r .ibtn .kbd{display:none}
+  .gbody dl{grid-template-columns:1fr}.gbody dt{margin-top:6px}
+  .modal.wide{max-height:92dvh}
+  .menu{left:12px!important;right:12px;min-width:0}
+}
 </style>
 </head>
 <body>
 
+<noscript><div style="padding:40px;text-align:center">Threadline needs JavaScript to analyse your chat in the browser.</div></noscript>
 <div id="home" class="home">
   <div class="home-in">
-    <div class="brand"><span class="logo"></span>Threadline</div>
+    <div class="home-top">
+      <div class="brand"><span class="logo"></span>Threadline</div>
+      <button class="btn ghost" id="homeGuide" data-ic="help">Guide</button>
+    </div>
     <h1>Your WhatsApp chat,<br><span class="grad">decoded.</span></h1>
-    <p class="sub">Timeline, calendar, head-to-head stats and a searchable media vault. Everything runs in this browser; nothing is uploaded anywhere.</p>
+    <p class="sub">Timeline, calendar, head-to-head stats, a searchable media vault and shareable “Wrapped” cards. Everything runs in this browser; nothing is uploaded anywhere.</p>
     <label id="drop" class="drop">
-      <input id="fileIn" type="file" multiple>
+      <input id="fileIn" type="file" multiple accept=".zip,.txt,text/plain,application/zip,image/*,video/*,audio/*,.pdf,.vcf" aria-label="Choose your WhatsApp export">
       <span data-ic="upload"></span>
-      <b>Drop your chat export here</b>
-      <span>The .zip from “Export chat → Include media”, or the .txt with its media files</span>
+      <b>Drop your chat export here, or tap to choose it</b>
+      <span>The .zip from “Export chat”, or the .txt with its media files</span>
     </label>
-    <div class="how">On your phone: open the chat → ⋮ → More → Export chat → Include media</div>
+    <div class="home-cta"><button class="btn lg pri" id="btnDemo" data-ic="play">Try a demo chat</button><span class="or">No export handy? Explore with made-up messages first.</span></div>
     <div id="saved" class="saved"></div>
+
+    <section class="sec" aria-labelledby="hHow">
+      <h2 id="hHow">How it works</h2>
+      <p class="lead">Three steps, about a minute. You export from WhatsApp, drop the file here, and Threadline does the rest on your device.</p>
+      <div class="steps">
+        <div class="card step"><b>Export from WhatsApp</b><span>Use WhatsApp’s built-in “Export chat”. Choose “Include media” to unlock the photo, video and file vault.</span></div>
+        <div class="card step"><b>Drop it in here</b><span>Drop the .zip as-is. No need to unzip it. You will be asked once which side of the chat is you.</span></div>
+        <div class="card step"><b>Explore</b><span>Seven views: Overview, Timeline, Calendar, Media, Links, Chat and Wrapped. A short tour shows you around.</span></div>
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="hExp">
+      <h2 id="hExp">How to export a chat</h2>
+      <p class="lead">Do this on your phone, for one chat at a time. WhatsApp on the desktop can’t export.</p>
+      <div class="card">
+        <div class="ptabs" role="tablist" aria-label="Phone type"><button role="tab" id="ptA" aria-selected="true" data-p="android">Android</button><button role="tab" id="ptI" aria-selected="false" data-p="ios">iPhone</button></div>
+        <ol class="olist" id="expA">
+          <li><span>Open the chat, then tap <em>⋮</em> (top right) → <em>More</em> → <em>Export chat</em>.</span></li>
+          <li><span>Choose <em>Include media</em> for the full experience, or <em>Without media</em> for a much smaller, text-only file.</span></li>
+          <li><span>Send the file to yourself (Drive, Gmail, Telegram, USB…) and open it on the device where you’re using Threadline. Or open Threadline on your phone and pick the file straight from Files.</span></li>
+        </ol>
+        <ol class="olist" id="expI" hidden>
+          <li><span>Open the chat, then tap the <em>contact or group name</em> at the top.</span></li>
+          <li><span>Scroll down and tap <em>Export Chat</em>, then choose <em>Attach Media</em> or <em>Without Media</em>.</span></li>
+          <li><span>In the share sheet choose <em>Save to Files</em>, AirDrop or Mail. Then drop that .zip here, or pick it from Files on this phone.</span></li>
+        </ol>
+        <div class="note warn">WhatsApp caps exports: roughly the latest 10,000 messages with media, or 40,000 without. For a long chat, a text-only export still covers far more history.</div>
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="hPriv">
+      <h2 id="hPriv">Your chat stays yours</h2>
+      <div class="trust">
+        <div class="card"><b data-ic="shield">Never uploaded</b><span>Your file is read and analysed inside this browser tab. The app makes no network requests, so there is nowhere for it to go.</span></div>
+        <div class="card"><b data-ic="save">Saved on this device only</b><span>So you can reopen a chat without importing again, it is kept in your browser’s own storage. Nobody else can see it.</span></div>
+        <div class="card"><b data-ic="trash">You are in control</b><span>“Forget” removes a chat, its media, tags and notes from this browser. The original export on your phone is never touched.</span></div>
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="hFaq">
+      <h2 id="hFaq">Common questions</h2>
+      <details class="faq"><summary>Do I need to unzip the export?</summary><div>No. Drop the .zip directly. If you already unzipped it, drop the .txt file together with all the media files at once.</div></details>
+      <details class="faq"><summary>Which format and language does it understand?</summary><div>Android and iPhone exports, 12 or 24-hour clocks, and day-first, month-first or year-first dates. The date order is detected automatically from your chat.</div></details>
+      <details class="faq"><summary>Why does the Media view say “Not exported”?</summary><div><p>You exported “Without media”, or WhatsApp skipped older files because of its size cap. Threadline can still see that a photo or video was sent, but has no file to show.</p><p>Re-export with media to fill the vault.</p></div></details>
+      <details class="faq"><summary>How big a chat can it handle?</summary><div>Parsing runs in the background so the page stays responsive, and media files are read on demand instead of being loaded into memory all at once, so large exports are designed to work. Very large chats take a few seconds to open, and a text-only export is much faster.</div></details>
+      <details class="faq"><summary>Can I analyse a group chat?</summary><div>Yes. Groups get a leaderboard (sortable by messages, words, reply speed and more) and a “who replies to whom” matrix instead of the two-person comparison.</div></details>
+    </section>
   </div>
 </div>
 
 <div id="appv" hidden>
   <header class="top">
     <div class="top-l"><span class="logo sm"></span><div style="min-width:0"><div id="chatTitle" class="ttl"></div><div id="chatSub" class="tsub"></div></div></div>
-    <nav id="tabs" class="tabs">
-      <button data-tab="overview" data-ic="grid">Overview</button>
-      <button data-tab="timeline" data-ic="activity">Timeline</button>
-      <button data-tab="calendar" data-ic="calendar">Calendar</button>
-      <button data-tab="media" data-ic="image">Media</button>
-      <button data-tab="links" data-ic="link">Links</button>
-      <button data-tab="chat" data-ic="msg">Chat</button>
-      <button data-tab="wrapped" data-ic="smile">Wrapped</button>
+    <nav id="tabs" class="tabs" role="tablist" aria-label="Views">
+      <button role="tab" data-tab="overview" data-ic="grid">Overview</button>
+      <button role="tab" data-tab="timeline" data-ic="activity">Timeline</button>
+      <button role="tab" data-tab="calendar" data-ic="calendar">Calendar</button>
+      <button role="tab" data-tab="media" data-ic="image">Media</button>
+      <button role="tab" data-tab="links" data-ic="link">Links</button>
+      <button role="tab" data-tab="chat" data-ic="msg">Chat</button>
+      <button role="tab" data-tab="wrapped" data-ic="smile">Wrapped</button>
     </nav>
     <div class="top-r">
-      <button id="btnSearch" class="ibtn" title="Search everything (Ctrl/⌘ K)" data-ic="search"></button>
-      <button id="btnHome" class="ibtn" title="Open another chat" data-ic="upload"></button>
-      <button id="btnForget" class="ibtn danger" title="Forget this chat" data-ic="trash"></button>
+      <button id="btnSearch" class="ibtn" title="Search everything (Ctrl/⌘ K or /)" aria-label="Search everything" data-ic="search"><span class="lbl">Search</span><span class="kbd">/</span></button>
+      <button id="btnHelp" class="ibtn" title="Guide and shortcuts (?)" aria-label="Open the guide" data-ic="help"></button>
+      <button id="btnMenu" class="ibtn" title="More" aria-label="More options" aria-haspopup="menu" data-ic="more"></button>
     </div>
   </header>
+  <div id="demoBar" class="demobar" hidden>Demo chat: every message here is made up.<button class="btn pri" id="demoExit">Use my own chat</button></div>
   <main>
-    <section id="v-overview" class="view" hidden></section>
-    <section id="v-timeline" class="view" hidden></section>
-    <section id="v-calendar" class="view" hidden></section>
-    <section id="v-media" class="view" hidden></section>
-    <section id="v-links" class="view" hidden></section>
-    <section id="v-chat" class="view" hidden></section>
-    <section id="v-wrapped" class="view" hidden></section>
+    <section id="v-overview" class="view" role="tabpanel" hidden></section>
+    <section id="v-timeline" class="view" role="tabpanel" hidden></section>
+    <section id="v-calendar" class="view" role="tabpanel" hidden></section>
+    <section id="v-media" class="view" role="tabpanel" hidden></section>
+    <section id="v-links" class="view" role="tabpanel" hidden></section>
+    <section id="v-chat" class="view" role="tabpanel" hidden></section>
+    <section id="v-wrapped" class="view" role="tabpanel" hidden></section>
   </main>
 </div>
 
@@ -460,6 +608,13 @@ eyeoff:'<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45
 card:'<rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8" cy="11" r="2.5"/><path d="M4.5 17c.8-1.8 2-2.6 3.5-2.6s2.7.8 3.5 2.6"/><line x1="14" y1="9" x2="19" y2="9"/><line x1="14" y1="13" x2="18" y2="13"/>',
 smile:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
 tag:'<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+help:'<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+more:'<circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/>',
+shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>',
+save:'<rect x="3" y="4" width="18" height="14" rx="2"/><line x1="8" y1="22" x2="16" y2="22"/><line x1="12" y1="18" x2="12" y2="22"/>',
+alert:'<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+swap:'<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
+refresh:'<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>',
 link:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
 };
 const ic=(n,c='')=>`<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]||''}</svg>`;
@@ -470,8 +625,13 @@ let toastT;
 function toast(msg,err){let t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t)}t.className='toast'+(err?' err':'');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,err?5000:2600)}
 function loader(msg){let l=$('#loader');if(msg===false){l&&l.remove();return}if(!l){l=document.createElement('div');l.id='loader';l.className='loader';l.innerHTML='<div><span class="spin"></span><span class="lm"></span></div>';document.body.appendChild(l)}$('.lm',l).textContent=msg}
 const nextFrame=()=>new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
-function modal(html){const o=document.createElement('div');o.className='ov';o.innerHTML=`<div class="modal">${html}</div>`;document.body.appendChild(o);return o}
-function confirmBox(title,text,okLabel){return new Promise(res=>{const o=modal(`<h2>${esc(title)}</h2><p>${esc(text)}</p><div class="acts"><button class="btn" data-v="0">Cancel</button><button class="btn pri" data-v="1">${esc(okLabel)}</button></div>`);o.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b||e.target===o){o.remove();res(!!(b&&b.dataset.v==='1'))}})})}
+let modalFrom=null;
+function modal(html,cls=''){const o=document.createElement('div');o.className='ov';o.innerHTML=`<div class="modal ${cls}" role="dialog" aria-modal="true">${html}</div>`;
+  modalFrom=document.activeElement;document.body.appendChild(o);
+  o.addEventListener('dismiss',()=>o.remove());
+  new MutationObserver((_,mo)=>{if(!o.isConnected){mo.disconnect();try{modalFrom?.focus?.()}catch{}}}).observe(document.body,{childList:true});
+  const f=$('[data-autofocus],button,[href],input',o);if(f)setTimeout(()=>f.focus(),30);return o}
+function confirmBox(title,text,okLabel){return new Promise(res=>{const o=modal(`<h2>${esc(title)}</h2><p>${esc(text)}</p><div class="acts"><button class="btn" data-v="0">Cancel</button><button class="btn pri" data-v="1">${esc(okLabel)}</button></div>`);o.addEventListener('dismiss',()=>res(false));o.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b||e.target===o){o.remove();res(!!(b&&b.dataset.v==='1'))}})})}
 
 /* tooltip (hover devices only) */
 const tip=$('#tip');
@@ -776,7 +936,7 @@ async function handleFiles(list){
     }
     const txts=[...fmap.keys()].filter(n=>/\.txt$/i.test(n));
     const tn=txts.find(n=>/^WhatsApp Chat|^_chat\.txt$/i.test(n))||txts.sort((a,b)=>fmap.get(b).size-fmap.get(a).size)[0];
-    if(!tn)throw new Error('No chat .txt found. Drop the exported .zip, or the .txt together with its media.');
+    if(!tn){const e=new Error('No chat text file found in what you dropped.');e.kind='notxt';throw e}
     loader('Parsing chat…');await nextFrame();
     const text=await fmap.get(tn).text();fmap.delete(tn);
     let title=tn.replace(/\.txt$/i,'').replace(/^WhatsApp Chat\s*(with|-)\s*/i,'');
@@ -784,17 +944,17 @@ async function handleFiles(list){
     const id='c'+hashStr(title+'|'+text.length+'|'+text.slice(0,300));
     const existing=await DB.chat(id).catch(()=>null);
     await openChat({id,title,text,files:fmap,me:existing?existing.me:undefined,fresh:true});
-  }catch(err){console.error(err);loader(false);toast(err.message||'Could not read that file',true)}
+  }catch(err){(err&&err.kind?console.warn:console.error)(err);loader(false);showProblem(err)}
 }
 
 async function openChat(rec){
   loader('Parsing chat…');await nextFrame();
   const names=[...rec.files.keys()];
   const R=await runCore(rec.text,names,(n,of)=>loader(n<0?'Crunching numbers…':`Parsing ${fmtN(n)} / ${fmtN(of)} lines…`));
-  if(!R.C.msgs.some(m=>m.type!=='system')){loader(false);throw new Error('No messages found. Is this a WhatsApp export?')}
+  if(!R.C.msgs.some(m=>m.type!=='system')){loader(false);const e=new Error('No messages found. This doesn’t look like a WhatsApp chat export.');e.kind='empty';throw e}
   loader('Building views…');await nextFrame();
   closeChat();
-  const C={id:rec.id,title:rec.title,text:rec.text,files:rec.files,msgs:R.C.msgs,senders:R.C.senders,media:R.C.media};
+  const C={id:rec.id,title:rec.title,text:rec.text,files:rec.files,msgs:R.C.msgs,senders:R.C.senders,media:R.C.media,demo:!!rec.demo};
   for(const md of C.media)md.file=md.name?(rec.files.get(md.name)||null):null;
   S.chat=C;C.order=C.senders.map((_,i)=>i);C.meIdx=-1;C.stats=R.stats;
   const notes=await DB.notes(C.id).catch(()=>[]);C.notes=new Map((notes||[]).map(n=>[n.mk,n]));
@@ -817,10 +977,10 @@ function setMe(C,me){
   const byCount=C.senders.map((_,i)=>i).sort((a,b)=>C.stats.per[b].msgs-C.stats.per[a].msgs);
   C.order=C.meIdx>=0?[C.meIdx,...byCount.filter(i=>i!==C.meIdx)]:byCount;
 }
-function askMe(C){
+function askMe(C,optional){
   return new Promise(res=>{
-    const o=modal(`<h2>Which one is you?</h2><p>Your side shows as “You”, in teal, on the right in the chat view.</p><div class="opts">${C.senders.map((n,i)=>`<button class="opt" data-i="${i}">${ic('user')}<b>${esc(n)}</b><span class="mut num">${fmtN(C.stats.per[i].msgs)} msgs</span></button>`).join('')}</div><div class="acts"><button class="btn" data-skip>Neither / skip</button></div>`);
-    o.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b){o.remove();res(C.senders[+b.dataset.i])}else if(e.target.closest('[data-skip]')){o.remove();res(null)}});
+    const o=modal(`<h2>Which one is you?</h2><p>Your side shows as “You”, in teal, on the right in the chat view. You can change this later from the ⋯ menu.</p><div class="opts">${C.senders.map((n,i)=>`<button class="opt" data-i="${i}">${ic('user')}<b>${esc(n)}</b><span class="mut num">${fmtN(C.stats.per[i].msgs)} msgs</span></button>`).join('')}</div><div class="acts"><button class="btn" data-skip>Neither / skip</button></div>`);
+    o.addEventListener('dismiss',()=>res(optional?false:null));o.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b){o.remove();res(C.senders[+b.dataset.i])}else if(e.target.closest('[data-skip]')){o.remove();res(null)}});
   });
 }
 function closeChat(){WR.k=0;LV.kind='all';LV.sender='all';LV.q='';MV.q='';MV.type='all';MV.sender='all';OV.sort='msgs';OV.dir=1;closeSearch();for(const u of S.urls.values())URL.revokeObjectURL(u);S.urls.clear();S.chat=null;S.rendered={};MV.sel.clear();MV.selMode=false;closeLB();closeDrawer()}
@@ -828,14 +988,16 @@ function closeChat(){WR.k=0;LV.kind='all';LV.sender='all';LV.q='';MV.q='';MV.typ
 function showApp(){
   const C=S.chat,st=C.stats;
   $('#home').hidden=true;$('#appv').hidden=false;
+  $('#demoBar').hidden=!C.demo;document.body.classList.toggle('demo',!!C.demo);
   $('#chatTitle').textContent=C.title;
   $('#chatSub').textContent=`${fmtN(st.total)} messages · ${fmtDateS(new Date(st.first))} → ${fmtDateS(new Date(st.last))} · ${C.senders.length} people`;
   document.title=`${C.title} · Threadline`;
   const h=(location.hash||'').slice(1);
   switchTab(['overview','timeline','calendar','media','links','chat','wrapped'].includes(h)?h:'overview');
+  autoTour();
 }
 async function showHome(){
-  closeChat();$('#appv').hidden=true;$('#home').hidden=false;document.title='Threadline — WhatsApp Chat Analyzer';
+  closeChat();endTour(true);document.body.classList.remove('demo');$('#appv').hidden=true;$('#home').hidden=false;scrollTo({top:0});document.title='Threadline — WhatsApp Chat Analyzer';
   try{history.replaceState(null,'',location.pathname+location.search)}catch{}
   renderSaved();
 }
@@ -850,16 +1012,15 @@ $('#saved').addEventListener('click',async e=>{
   if(o){loader('Loading saved chat…');await nextFrame();try{const rec=await DB.chat(o.dataset.open);const fl=await DB.files(rec.id);rec.files=new Map(fl.map(f=>[f.name,f.blob]));await openChat(rec)}catch(err){console.error(err);loader(false);toast('Could not load: '+err.message,true)}}
   if(d){if(await confirmBox('Forget this chat?','Removes the chat, its media, tags and notes from this browser. The original export on your device is untouched.','Forget')){await DB.del(d.dataset.del).catch(()=>{});renderSaved();toast('Forgotten')}}
 });
-$('#btnHome').onclick=showHome;
-$('#btnForget').onclick=async()=>{const C=S.chat;if(!C)return;if(await confirmBox(`Forget “${C.title}”?`,'Removes the chat, its media, tags and notes from this browser. The original export on your device is untouched.','Forget')){await DB.del(C.id).catch(()=>{});toast('Forgotten');showHome()}};
+async function forgetCurrent(){const C=S.chat;if(!C)return;if(C.demo){exitDemo();return}if(await confirmBox(`Forget “${C.title}”?`,'Removes the chat, its media, tags and notes from this browser. The original export on your device is untouched.','Forget')){await DB.del(C.id).catch(()=>{});toast('Forgotten');showHome()}}
 
 /* ---------- tabs ---------- */
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)switchTab(b.dataset.tab)});
 function switchTab(t){
-  S.tab=t;$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  S.tab=t;$$('#tabs button').forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
   $$('.view').forEach(v=>v.hidden=v.id!=='v-'+t);
   try{history.replaceState(null,'','#'+t)}catch{}
-  if(!S.rendered[t]){S.rendered[t]=true;({overview:renderOverview,timeline:renderTimeline,calendar:renderCalendar,media:renderMedia,links:renderLinks,chat:renderChat,wrapped:renderWrapped})[t]()}
+  if(!S.rendered[t]){S.rendered[t]=true;({overview:renderOverview,timeline:renderTimeline,calendar:renderCalendar,media:renderMedia,links:renderLinks,chat:renderChat,wrapped:renderWrapped})[t]();addHint(t)}
   $('#selbarWrap')?.toggleAttribute('hidden',t!=='media'||!MV.selMode);
   if(t!=='chat')scrollTo({top:0});
 }
@@ -876,7 +1037,7 @@ function renderOverview(){
     [fmtN(spanDays),'Days span',`${fmtDateS(new Date(st.first))} → ${fmtDateS(new Date(st.last))}`],
     [fmtN(st.dayKeys.length),'Active days',`${pct(st.dayKeys.length,spanDays)}% of all days`],
     [st.streak.len+'d','Longest streak',st.streak.from?`${fmtDateS(keyDate(st.streak.from))} → ${fmtDateS(keyDate(st.streak.to))}`:''],
-    [fmtN(media),'Media',`${files} files in export`],
+    [fmtN(media),'Media',files?`${fmtN(files)} files in export`:'none in export · see Guide'],
     [fmtHour(peakH),'Peak hour',`busiest weekday: ${WD[peakW]}`],
   ];
   let vs='';const grp=C.senders.length>2;
@@ -900,7 +1061,7 @@ function renderOverview(){
       ['Longest message (words)',pa.longest.w,pb.longest.w,fmtN],
     ];
     vs=`<div class="card s7"><div class="vs-head"><div class="who">${avatar(A)}<div style="min-width:0"><b>${esc(sname(A))}</b><small>${esc(A===C.meIdx?fullName(A):pct(pa.msgs,st.total)+'% of messages')}</small></div></div><span class="vs-x">VS</span><div class="who r"><div style="min-width:0"><b>${esc(sname(B))}</b><small>${pct(pb.msgs,st.total)}% of messages</small></div>${avatar(B)}</div></div>
-    ${rows.filter(r=>r[1]||r[2]).map(([l,a,b,f,h])=>`<div class="vs-row"><div class="vs-n num" style="color:${a>=b?colorOf(A):'inherit'}">${f(a)}</div><div><div class="vs-l">${l}${h?` <span class="dim">· ${h}</span>`:''}</div><div class="bar"><i style="width:${(a/((a+b)||1))*100}%;background:${colorOf(A)}"></i><i style="width:${(b/((a+b)||1))*100}%;background:${colorOf(B)}"></i></div></div><div class="vs-n b num" style="color:${b>a?colorOf(B):'inherit'}">${f(b)}</div></div>`).join('')}
+    ${rows.filter(r=>r[1]||r[2]).map(([l,a,b,f,h])=>`<div class="vs-row"><div class="vs-n num" style="color:${a>=b?colorOf(A):'inherit'}">${f(a)}</div><div><div class="vs-l"${METRIC_TIPS[l]?` data-tip="${esc(METRIC_TIPS[l])}" title="${esc(METRIC_TIPS[l])}" style="cursor:help"`:''}>${l}${h?` <span class="dim">· ${h}</span>`:''}</div><div class="bar"><i style="width:${(a/((a+b)||1))*100}%;background:${colorOf(A)}"></i><i style="width:${(b/((a+b)||1))*100}%;background:${colorOf(B)}"></i></div></div><div class="vs-n b num" style="color:${b>a?colorOf(B):'inherit'}">${f(b)}</div></div>`).join('')}
     ${C.senders.length>2?`<div class="dim" style="font-size:11.5px;margin-top:8px">Showing the top two of ${C.senders.length} participants.</div>`:''}</div>`;
   }
   // fun facts
@@ -932,6 +1093,7 @@ function renderOverview(){
   if(grp)wireBoard();
 }
 const sumMap=m=>{let s=0;m.forEach(v=>s+=v);return s};
+const METRIC_TIPS={'Messages':'Every message sent, excluding system notices.','Words':'Total words in text messages (media and deleted messages excluded).','Avg words / message':'Words per text message. Higher means longer messages.','Conversations started':'Who sent the first message after a quiet gap of 6 hours or more.','Median reply time':'Typical wait before answering the other person. Only replies within 6 hours count. Lower is faster.','Messages per turn':'Average messages in a row before the other person speaks. High means double-texting.','Media shared':'Photos, videos, audio, stickers, documents and contacts.','Links shared':'Messages that contain a web link.','Questions asked':'Messages that end with a question mark.','Laughs':'Messages with haha, lol, lmao, or a laughing emoji.','Emoji used':'Total emoji across all messages.','Night owl (12–5am)':'Messages sent between midnight and 5am.','Deleted · edited':'Messages deleted for everyone, plus messages edited after sending.','Longest message (words)':'The wordiest single message.'};
 document.addEventListener('click',e=>{
   const d=e.target.closest('[data-day]');if(d&&!e.target.closest('.lb')){openDay(d.dataset.day);return}
   const q=e.target.closest('[data-chatq]');if(q){goChatSearch(q.dataset.chatq);return}
@@ -1116,6 +1278,7 @@ function renderMedia(){
   <select id="mSort"><option value="new">Newest first</option><option value="old">Oldest first</option></select>
   <button class="btn" id="mSel">${ic('check')} Select</button></div>
   <div class="chips" id="mTypes"><button class="chip on" data-t="all">All <small>${C.media.length}</small></button>${TYPE_ORDER.filter(t=>cnt[t]).map(t=>`<button class="chip" data-t="${t}">${ic(TYPE_IC[t])}${TYPE_PL[t]} <small>${cnt[t]}</small></button>`).join('')}${off?`<button class="chip" data-t="off">${ic('eyeoff')}Not exported <small>${off}</small></button>`:''}</div>
+  ${(C.media.length&&!C.media.some(m=>m.file))?`<div class="note warn callout">${ic('alert')}<div><b>No media files came with this export.</b> Threadline can see that ${fmtN(C.media.length)} items were shared, but the files weren’t included. Re-export the chat from WhatsApp with <b>Include media</b> (iPhone: <b>Attach Media</b>) and drop it here again to browse, search and download them.</div></div>`:''}
   <div id="mInfo" class="mut" style="font-size:12px"></div>
   <div class="mgrid" id="mGrid"></div>
   <div id="selbarWrap" hidden><div class="selbar"><b id="selN" class="num">0 selected</b><span id="selSz" class="mut num" style="font-size:12px"></span><button class="btn" id="selAll">All</button><button class="btn" id="selNone">Clear</button><button class="btn pri" id="selDl">${ic('download')} Download .zip</button></div></div>`;
@@ -1208,13 +1371,13 @@ async function renderLB(){
 function navLB(d){$$('#lb video,#lb audio').forEach(m=>{try{m.pause()}catch{}});LB.k=(LB.k+d+LB.list.length)%LB.list.length;renderLB()}
 function saveNote(it,{tags,note}){
   const C=S.chat,rec={key:C.id+'|'+it.mk,chat:C.id,mk:it.mk,tags,note};C.notes.set(it.mk,rec);
-  DB.putNote(rec).catch(()=>toast('Couldn’t save the tag offline',true));
+  if(!C.demo)DB.putNote(rec).catch(()=>toast('Couldn’t save the tag offline',true));   // demo chat is never persisted
   if(it.url){const el=S.rendered.links&&$(`.lk[data-lid="${it.id}"]`);if(el)el.outerHTML=linkCardHTML(it);return}
   if(S.rendered.media){const t=$(`#mGrid .tile[data-id="${it.id}"]`);if(t){t.outerHTML=tileHTML(it);hydrate($('#mGrid'))}}
 }
 document.addEventListener('keydown',e=>{
   if(!$('#lb').hidden&&!/INPUT|TEXTAREA/.test(document.activeElement?.tagName)){if(e.key==='Escape')closeLB();else if(e.key==='ArrowLeft')navLB(-1);else if(e.key==='ArrowRight')navLB(1);return}
-  if(e.key==='Escape'){if(!$('#lb').hidden)closeLB();else if($('#drawer'))closeDrawer();else $('.ov')?.remove()}
+  if(e.key==='Escape'){if(!$('#lb').hidden)closeLB();else if($('#drawer'))closeDrawer();else $('.ov:not(#sov)')?.dispatchEvent(new Event('dismiss'))}
 });
 /* touch swipe in lightbox */
 let tx0=null;$('#lb').addEventListener('touchstart',e=>{if(e.target.closest('.lb-main'))tx0=e.touches[0].clientX},{passive:true});
@@ -1384,9 +1547,10 @@ function runSearch(){
 }
 document.addEventListener('keydown',e=>{
   if($('#sov')&&e.key==='Escape'){e.stopImmediatePropagation();closeSearch();return}
-  if(!S.chat||$('#appv').hidden)return;
+  if(!S.chat||$('#appv').hidden||$('#tourPop'))return;
   const typing=/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
-  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch()}
+  if(e.key==='?'&&!typing&&$('#lb').hidden&&!$('.ov')){e.preventDefault();openGuide('keys')}
+  else if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch()}
   else if(e.key==='/'&&!typing&&$('#lb').hidden){e.preventDefault();openSearch()}
   else if(S.tab==='wrapped'&&!typing&&$('#lb').hidden&&!$('.ov')){if(e.key==='ArrowRight')wrStep(1);if(e.key==='ArrowLeft')wrStep(-1)}
 },true);
@@ -1499,6 +1663,226 @@ function renderWrapped(){
 }
 function wrStep(d){const n=WR_CARDS.length;WR.k=Math.min(n-1,Math.max(0,WR.k+d));drawWR()}
 function drawWR(){const c=$('#wrC');if(!c)return;WR_CARDS[WR.k](c.getContext('2d'),wrD(),WR.k);$('#wrDots').innerHTML=WR_CARDS.map((_,i)=>`<i class="${i<=WR.k?'on':''}"></i>`).join('');$('#wrN').textContent=`${WR.k+1} / ${WR_CARDS.length}`}
+
+/* =========================================================
+   Onboarding, help & demo
+   ========================================================= */
+const store={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}}};
+
+/* ---------- demo chat (synthetic, generated on the fly) ---------- */
+function makeDemoText(){
+  let seed=11;const rnd=()=>(seed=(seed*1664525+1013904223)>>>0)/2**32,pick=a=>a[Math.floor(rnd()*a.length)];
+  const A='Aarav',B='Mira',P=n=>String(n).padStart(2,'0');
+  const talk={m:['good morning ☀️','morning! slept okay?','up yet?','coffee first, humans later ☕','gm gm','rise and shine sleepyhead 😴'],
+    f:['lunch today?','biryani or pasta?','that new place near the metro looks good','i’m starving 😩','dosa at 1?','let’s try the ramen place'],
+    p:['movie tonight?','what time are we meeting?','can you call me later?','are we still on for saturday?','running 10 mins late, sorry!','i’ll book the tickets','my place or yours?','send me the location','reached 👍'],
+    w:['work has been so hectic this week','the meeting ran over again','finally done with the report 🎉','my manager just changed the deadline… again','need a break honestly','send help (and chai)'],
+    l:['haha that was so funny 😂😂','lol no way','omg 😂','you’re impossible 🤣','hahaha stop it','i can’t even 😆'],
+    s:['ok','done ✅','sure!','sounds good','yes yes','hmm let me think','thanks!','love it ❤️','miss you','did you see that?','what happened?','how was your day?','did you eat?','call me when you’re free']};
+  const links=['https://youtu.be/dQw4w9WgXcQ','https://www.youtube.com/watch?v=jNQXAC9IVRw','https://maps.app.goo.gl/Qx7mDemo1','https://www.instagram.com/reel/Cdemo123/','https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC','https://www.amazon.in/dp/B0DEMO123','https://github.com/octocat/Hello-World','https://www.zomato.com/bangalore/demo-cafe'];
+  const linkTx=['look at this','check this out','found it:','you’ll love this','for the trip','add this to the list'];
+  const out=['12/01/2025, 9:00 am - Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.'];
+  const start=new Date(2025,0,12),end=new Date(2025,9,28);let last=A;
+  for(const d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+    const dk=`${d.getFullYear()}-${P(d.getMonth()+1)}-${P(d.getDate())}`,dow=d.getDay(),we=dow===0||dow===6;
+    if(dk>='2025-08-02'&&dk<='2025-08-11')continue;               // a quiet stretch
+    if(rnd()<.1&&dk!=='2025-06-14')continue;                      // random off days
+    let n=Math.round((we?22:14)*(.5+rnd()));
+    if(dk==='2025-06-14')n=70;                                    // birthday
+    if(dk>='2025-03-21'&&dk<='2025-03-23')n+=26;                  // weekend trip
+    const mins=[];const clump=(a,b,k)=>{for(let i=0;i<k;i++)mins.push(a+Math.floor(rnd()*(b-a)))};
+    clump(8*60,10*60+30,Math.ceil(n*.2));clump(12*60+30,14*60,Math.ceil(n*.2));clump(19*60,23*60,Math.ceil(n*.5));
+    if(rnd()<.12||dk==='2025-06-14')clump(0,95,Math.ceil(n*.15));
+    mins.sort((a,b)=>a-b);
+    let prevM=-1;
+    for(const mm of mins){
+      const t=Math.max(mm,prevM+(rnd()<.5?0:1));prevM=t;
+      if(rnd()<.45)last=last===A?B:A;
+      const h=Math.floor(t/60)%24,mi=t%60,ap=h<12?'am':'pm',h12=h%12||12;
+      let tx;const r=rnd(),hh=h;
+      if(r<.06)tx='<Media omitted>';
+      else if(r<.11)tx=`${pick(linkTx)} ${pick(links)}`;
+      else if(r<.13)tx='location: https://maps.google.com/?q=12.9716,77.5946';
+      else if(r<.2)tx=pick(talk.l);
+      else if(hh<11&&rnd()<.4)tx=pick(talk.m);
+      else if(hh>=12&&hh<15&&rnd()<.4)tx=pick(talk.f);
+      else if(r<.4)tx=pick(talk.p);
+      else if(r<.5)tx=pick(talk.w);
+      else tx=pick(talk.s);
+      if(dk==='2025-06-14'&&rnd()<.5)tx=pick(['happy birthday!! 🎂🎉','best day ever 🥳','many many happy returns ❤️','party time!! 🎈']);
+      out.push(`${P(d.getDate())}/${P(d.getMonth()+1)}/${d.getFullYear()}, ${h12}:${P(mi)} ${ap} - ${last}: ${tx}`);
+    }
+  }
+  return out.join('\n')+'\n';
+}
+async function loadDemo(){
+  loader('Building a demo chat…');await nextFrame();
+  try{await openChat({id:'demo',title:'Demo · Aarav & Mira',text:makeDemoText(),files:new Map(),me:'Aarav',fresh:false,demo:true})}
+  catch(e){console.error(e);loader(false);showProblem(e)}
+}
+function exitDemo(){showHome();setTimeout(()=>$('#drop')?.scrollIntoView({behavior:'smooth',block:'center'}),50)}
+
+/* ---------- friendly error dialog ---------- */
+function showProblem(err){
+  const k=err&&err.kind;
+  const T={notxt:['I couldn’t find a chat in that','<ul><li>Drop the <b>.zip</b> exactly as WhatsApp made it. No need to unzip.</li><li>If you unzipped it, select the <b>.txt</b> file and the media files together and drop them all at once.</li><li>Not exported yet? See the steps on the home page.</li></ul>'],
+    empty:['That doesn’t look like a WhatsApp export','<ul><li>Make sure it is the chat <b>.txt</b> (or the .zip containing it) from WhatsApp’s <b>Export chat</b>.</li><li>Exports from other apps, or copied-and-pasted chats, use a different layout.</li><li>Very short or heavily edited files can also fail. Try exporting again.</li></ul>']}[k];
+  const msg=err&&err.message||'Something went wrong while reading that file.';
+  const o=modal(`<div class="problem"><span class="ic big" style="display:block">${ic('alert')}</span><h2>${esc(T?T[0]:'Couldn’t open that file')}</h2><p>${esc(msg)}</p>${T?T[1]:'<ul><li>Try dropping it again, or export the chat again from WhatsApp.</li><li>If it keeps failing, open the troubleshooting guide.</li></ul>'}</div><div class="acts"><button class="btn" data-g>Troubleshooting guide</button><button class="btn pri" data-ok data-autofocus>Got it</button></div>`);
+  o.addEventListener('click',e=>{if(e.target.closest('[data-g]')){o.remove();openGuide('trouble')}else if(e.target.closest('[data-ok]')||e.target===o)o.remove()});
+}
+
+/* ---------- guide ---------- */
+const GUIDE_NAV=[['start','Get started'],['views','The views'],['metrics','What the numbers mean'],['keys','Search & shortcuts'],['privacy','Privacy & storage'],['trouble','Troubleshooting']];
+const GUIDE={
+start:`<h3>Get started</h3>
+<ol class="olist" style="margin-bottom:14px"><li><span><b>Export a chat</b> in WhatsApp: open it → <em>⋮ → More → Export chat</em> (Android) or tap the name → <em>Export Chat</em> (iPhone). Choose <em>Include media</em> to fill the Media vault.</span></li><li><span><b>Drop the .zip here</b> (or pick it with the file chooser). No need to unzip. If you already did, drop the .txt and the media files together.</span></li><li><span><b>Say which person is you</b>. Your side becomes “You” in teal. You can change it later from the ⋯ menu.</span></li><li><span><b>Explore</b>. Tap anything that looks tappable: days, words, bars and media all jump somewhere useful.</span></li></ol>
+<p>Want to look around first? Use <b>Try a demo chat</b> on the home page. It uses made-up messages, nothing of yours.</p><p>You can replay the guided tour any time from the <b>⋯</b> menu.</p>`,
+views:`<h3>The seven views</h3><dl>
+<dt>Overview</dt><dd>The big picture. A head-to-head comparison (or a sortable leaderboard in groups), highlights, your daily rhythm, weekday pattern, busiest days, and each person’s signature words and emoji.</dd>
+<dt>Timeline</dt><dd>Month by month, with a bar chart, trend lines for reply speed and message length, and a card per month with its top words, best quote and photos. “Read” opens that month in the chat.</dd>
+<dt>Calendar</dt><dd>A year heatmap plus a month grid. Tap any day to read that day’s messages in a side panel.</dd>
+<dt>Media</dt><dd>Everything shared as a photo, video, audio, sticker, document or contact. Search by caption or nearby conversation, add tags and notes, select many and download them as a .zip.</dd>
+<dt>Links</dt><dd>Every link, grouped by site (YouTube, Maps, Instagram and more), with the surrounding conversation. Tag, copy, or export the list to CSV.</dd>
+<dt>Chat</dt><dd>The whole conversation, scrollable, with in-chat search, jump-to-date, and media shown inline.</dd>
+<dt>Wrapped</dt><dd>Seven story-sized cards (1080×1920) drawn from your stats. Download one or all. Turn on “Hide names” before posting publicly.</dd></dl>`,
+metrics:`<h3>What the numbers mean</h3><dl>
+<dt>Conversation started</dt><dd>The first message after a quiet gap of 6 hours or more.</dd>
+<dt>Median reply time</dt><dd>The typical wait before someone answers the other person. Only replies within 6 hours count; the median ignores the odd very long gap.</dd>
+<dt>Messages per turn</dt><dd>How many messages in a row someone sends before the other person speaks. Higher means more double-texting.</dd>
+<dt>Active days</dt><dd>Days with at least one message. “Longest streak” is the most consecutive active days; “longest silence” is the longest run with none.</dd>
+<dt>Night owl</dt><dd>Messages sent between midnight and 5am.</dd>
+<dt>Laughs</dt><dd>Messages containing haha, lol, lmao, rofl or a laughing emoji.</dd>
+<dt>Questions</dt><dd>Messages ending in a question mark.</dd>
+<dt>Signature words</dt><dd>Each person’s most-used words, after removing common filler words (English and Hinglish).</dd>
+<dt>Heatmap colour</dt><dd>In a two-person chat, each day leans toward the colour of whoever sent more messages.</dd></dl>`,
+keys:`<h3>Search</h3><p>Press <span class="kbd big">/</span> or <span class="kbd big">Ctrl</span> / <span class="kbd big">⌘</span> + <span class="kbd big">K</span> anywhere to search messages, media, links, tags and notes together. Filter by type, person and date range. <span class="kbd big">Enter</span> opens the first result.</p>
+<h3>Keyboard shortcuts</h3><table>
+<tr><td><span class="kbd big">/</span> or <span class="kbd big">Ctrl/⌘ K</span></td><td>Search everything</td></tr>
+<tr><td><span class="kbd big">?</span></td><td>Open this guide</td></tr>
+<tr><td><span class="kbd big">Esc</span></td><td>Close the current panel, dialog or search</td></tr>
+<tr><td><span class="kbd big">←</span> <span class="kbd big">→</span></td><td>Previous / next photo in the viewer, or previous / next card in Wrapped</td></tr>
+<tr><td><span class="kbd big">Enter</span></td><td>In Chat search: jump to the next older match. <span class="kbd big">Shift</span>+<span class="kbd big">Enter</span> goes newer</td></tr></table>
+<h3>Tap to dive in</h3><ul><li>A <b>day</b> (Overview, Calendar) opens that day’s messages.</li><li>A <b>word</b> (Overview, Timeline) searches the chat for it.</li><li>A <b>bar</b> on the Timeline jumps to that month.</li><li>A <b>media tile</b> opens the viewer, with the messages around it, tags and notes.</li></ul>`,
+privacy:`<h3>Privacy & storage</h3><ul><li>Your export is read and analysed <b>inside this browser tab</b>. Threadline makes no network requests, so nothing is uploaded.</li><li>To let you reopen a chat later, it is saved in your browser’s own storage (IndexedDB) on this device only. You can see saved chats on the home page.</li><li><b>Forget</b> (⋯ menu, or the bin on the home page) deletes the chat, its media, your tags and your notes from this browser. The original export on your phone is never touched.</li><li>Clearing site data or using a private window also removes saved chats.</li><li>Wrapped cards are drawn on your device. They contain stats, not your messages, apart from top words and emoji.</li></ul>`,
+trouble:`<h3>Troubleshooting</h3><dl>
+<dt>“No chat text file found”</dt><dd>Drop the .zip as WhatsApp made it, or drop the .txt together with its media. A folder or a zip of a zip won’t work.</dd>
+<dt>“No messages found”</dt><dd>The file isn’t a WhatsApp export, or uses an unusual layout. Re-export with WhatsApp’s <b>Export chat</b>.</dd>
+<dt>Media says “Not exported”</dt><dd>The export was “Without media”, or WhatsApp dropped older files because of its size cap. Re-export with <b>Include media</b>.</dd>
+<dt>Wrong person is “You”</dt><dd>Open the <b>⋯</b> menu → <b>Change who is “You”</b>.</dd>
+<dt>Day and month look swapped</dt><dd>The date order is detected from the chat. Very short chats where every day is 12 or below can be ambiguous. Try exporting a longer span.</dd>
+<dt>Names show as phone numbers</dt><dd>WhatsApp uses the number when the person isn’t saved in your contacts.</dd>
+<dt>“This browser can’t unzip natively”</dt><dd>Older browsers lack the needed API. Unzip the export yourself and drop the files, or use a current Chrome, Edge, Safari or Firefox.</dd>
+<dt>“Saving offline failed”</dt><dd>Storage is blocked (private window) or full. Everything still works; you’ll just import the export again next time.</dd>
+<dt>The page feels slow on a huge export</dt><dd>Media is loaded lazily, but the first parse of a very large chat takes a few seconds. Exporting without media is much faster.</dd></dl>`};
+function openGuide(sec='start'){
+  const o=modal(`<div class="mh"><h2>Guide</h2><button class="ibtn" data-x aria-label="Close guide">${ic('x')}</button></div><div class="gnav" role="tablist">${GUIDE_NAV.map(([k,l])=>`<button class="chip" role="tab" data-g="${k}">${l}</button>`).join('')}</div><div class="gbody" id="gBody" tabindex="0"></div>`,'wide');
+  const show=k=>{$$('.gnav .chip',o).forEach(c=>{const on=c.dataset.g===k;c.classList.toggle('on',on);c.setAttribute('aria-selected',on)});const b=$('#gBody',o);b.innerHTML=GUIDE[k];b.scrollTop=0};
+  o.addEventListener('click',e=>{const g=e.target.closest('[data-g]');if(g){show(g.dataset.g);return}if(e.target.closest('[data-x]')||e.target===o)o.remove()});
+  show(sec);
+}
+
+/* ---------- ⋯ menu ---------- */
+function closeMenu(){$('#menu')?.remove()}
+function openMenu(){
+  if($('#menu')){closeMenu();return}
+  const C=S.chat,b=$('#btnMenu'),r=b.getBoundingClientRect(),m=document.createElement('div');
+  m.id='menu';m.className='menu';m.setAttribute('role','menu');
+  const it=(a,i,l,c='')=>`<button role="menuitem" data-a="${a}" class="${c}">${ic(i)}${l}</button>`;
+  m.innerHTML=it('guide','help','Guide & shortcuts')+it('tour','play','Take the tour again')+(C.senders.length>=2?it('me','swap','Change who is “You”'):'')+it('home','upload','Open another chat')+'<hr>'+(C.demo?it('forget','x','Exit the demo'):it('forget','trash','Forget this chat','danger'));
+  document.body.appendChild(m);
+  m.style.top=r.bottom+6+'px';m.style.left=Math.max(8,Math.min(innerWidth-m.offsetWidth-8,r.right-m.offsetWidth))+'px';
+  $('button',m).focus();
+  m.addEventListener('click',e=>{const a=e.target.closest('[data-a]')?.dataset.a;if(!a)return;closeMenu();
+    ({guide:()=>openGuide('start'),tour:()=>startTour(),me:changeMe,home:showHome,forget:forgetCurrent})[a]()});
+  m.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const bs=$$('button',m),i=bs.indexOf(document.activeElement);bs[(i+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length].focus()}});
+}
+document.addEventListener('mousedown',e=>{if($('#menu')&&!e.target.closest('#menu,#btnMenu'))closeMenu()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#menu')){e.stopImmediatePropagation();closeMenu();$('#btnMenu')?.focus()}},true);
+async function changeMe(){
+  const C=S.chat,me=await askMe(C,true);if(me===false)return;
+  setMe(C,me);S.rendered={};MV.sel.clear();MV.selMode=false;
+  $$('.view').forEach(v=>v.replaceWith(v.cloneNode(false)));   // fresh nodes drop stale listeners
+  switchTab(S.tab);
+  if(!C.demo){try{const rec=await DB.chat(C.id);if(rec){rec.me=me??null;await DB.putChat(rec)}}catch(e){console.warn(e)}}
+  toast(me?`You are now “${me}”`:'No one is marked as you');
+}
+
+/* ---------- per-view tips ---------- */
+const HINTS={
+  overview:['Overview','Who talks more, who replies faster, your busiest days and signature words. Hover a stat’s label to see how it’s worked out; tap a day or a word to jump into the messages.'],
+  timeline:['Timeline','Your chat month by month. Tap a bar to jump to that month, or press “Read” on a card to open it in the chat.'],
+  calendar:['Calendar','Every day you talked, as a heatmap. Tap a day to read it. In a two-person chat the colour leans toward whoever sent more.'],
+  media:['Media vault','Search by caption, by what was said nearby, or by date. Open an item to add tags and notes. Use Select to download many as a .zip.'],
+  links:['Links','Every link that was shared, with the conversation around it. Open a card to tag it or copy the link.']};
+function addHint(t){const h=HINTS[t];if(!h||store.get('threadline.hint.'+t))return;
+  $('#v-'+t).insertAdjacentHTML('afterbegin',`<div class="hint" role="note"><p><b>${h[0]}.</b> ${h[1]}</p><button class="hx ibtn" data-hx="${t}" aria-label="Dismiss this tip" title="Dismiss">${ic('x')}</button></div>`)}
+document.addEventListener('click',e=>{const x=e.target.closest('[data-hx]');if(x){store.set('threadline.hint.'+x.dataset.hx,'1');x.closest('.hint').remove()}});
+
+/* ---------- guided tour ---------- */
+const TOUR_KEY='threadline.tour.v1';
+const TOUR=[
+  {center:true,t:'Welcome to Threadline',b:'A 30-second tour of what you can do with this chat. Everything here is calculated on your device; nothing is uploaded.'},
+  {tab:'overview',sel:'[data-tab=overview]',t:'Overview',b:'Who talks more, who replies faster, your busiest days and signature words. Hover a stat label for what it means.'},
+  {tab:'timeline',sel:'[data-tab=timeline]',t:'Timeline',b:'Your chat month by month, with trends and a card for each month. Tap a bar to jump to it.'},
+  {tab:'calendar',sel:'[data-tab=calendar]',t:'Calendar',b:'A heatmap of every day you talked. Tap a day to read it in a side panel.'},
+  {tab:'media',sel:'[data-tab=media]',t:'Media',b:'Photos, videos, audio and files in one searchable vault. Tag them, add notes, download many at once.'},
+  {tab:'links',sel:'[data-tab=links]',t:'Links',b:'Every link anyone shared, with the conversation around it.'},
+  {tab:'chat',sel:'[data-tab=chat]',t:'Chat',b:'Read the full conversation with search, jump-to-date and inline media.'},
+  {tab:'wrapped',sel:'[data-tab=wrapped]',t:'Wrapped',b:'Story-sized cards of your stats to download and share. Switch on “Hide names” first if you’ll post them.'},
+  {tab:'overview',sel:'#btnSearch',t:'Search everything',b:'Press / or Ctrl/⌘ K from anywhere to search messages, media, links and your notes at once.'},
+  {sel:'#btnHelp',t:'Help is always here',b:'The guide explains every view and number, plus shortcuts and fixes. Replay this tour from the ⋯ menu.'}];
+let tourI=-1,tourKey=null;
+function autoTour(){if(store.get(TOUR_KEY))return;const go=()=>{if(!S.chat||$('#appv').hidden)return;if($('.ov')||$('#sov')||$('#loader'))return setTimeout(go,800);startTour()};setTimeout(go,500)}
+function startTour(){
+  endTour(true);closeMenu();
+  const blk=document.createElement('div');blk.className='tour-blk';blk.id='tourBlk';
+  const hl=document.createElement('div');hl.className='tour-hl none';hl.id='tourHl';
+  const pop=document.createElement('div');pop.className='tour-pop';pop.id='tourPop';pop.setAttribute('role','dialog');pop.setAttribute('aria-label','Guided tour');
+  document.body.append(blk,hl,pop);
+  tourKey=e=>{if(e.key==='Escape'){e.stopImmediatePropagation();e.preventDefault();endTour()}else if(e.key==='ArrowRight'||e.key==='Enter'){if(e.key==='Enter'&&e.target.closest&&e.target.closest('button'))return;e.stopImmediatePropagation();e.preventDefault();tourGo(1)}else if(e.key==='ArrowLeft'){e.stopImmediatePropagation();e.preventDefault();tourGo(-1)}};
+  document.addEventListener('keydown',tourKey,true);addEventListener('resize',tourPlace);
+  pop.addEventListener('click',e=>{const a=e.target.closest('[data-t]')?.dataset.t;if(a==='next')tourGo(1);else if(a==='back')tourGo(-1);else if(a==='skip')endTour()});
+  blk.addEventListener('click',()=>{});
+  tourI=0;tourShow();
+}
+function tourGo(d){const n=tourI+d;if(n<0)return;if(n>=TOUR.length){endTour();return}tourI=n;tourShow()}
+function tourShow(){
+  const st=TOUR[tourI],pop=$('#tourPop');if(!pop)return;
+  if(st.tab&&S.tab!==st.tab)switchTab(st.tab);
+  const last=tourI===TOUR.length-1;
+  pop.classList.toggle('center',!!st.center);
+  pop.innerHTML=`<h2>${st.t}</h2><p>${st.b}</p><div class="tf"><div class="dots" aria-hidden="true">${TOUR.map((_,i)=>`<i class="${i===tourI?'on':''}"></i>`).join('')}</div>${tourI>0?'<button class="btn" data-t="back">Back</button>':'<button class="skip" data-t="skip">Skip</button>'}<button class="btn pri" data-t="next" data-autofocus>${last?'Done':st.center?'Start tour':'Next'}</button></div>${tourI>0&&!last?'<div style="margin-top:8px;text-align:right"><button class="skip" data-t="skip">Skip tour</button></div>':''}`;
+  requestAnimationFrame(()=>{tourPlace();$('[data-t=next]',pop)?.focus()});
+}
+function tourPlace(){
+  const pop=$('#tourPop'),hl=$('#tourHl');if(!pop)return;const st=TOUR[tourI];
+  const el=st.sel?$(st.sel):null,vis=el&&el.offsetParent!==null&&el.getBoundingClientRect().width>0;
+  if(!vis||st.center){pop.classList.add('center');pop.style.left=pop.style.top='';hl.classList.add('none');hl.style.cssText='left:50%;top:50%;width:0;height:0';return}
+  pop.classList.remove('center');hl.classList.remove('none');
+  const r=el.getBoundingClientRect(),pad=6;
+  hl.style.cssText=`left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`;
+  const pw=pop.offsetWidth,ph=pop.offsetHeight;
+  let top=r.bottom+pad+12;if(top+ph>innerHeight-12)top=r.top-pad-12-ph;top=Math.max(12,top);
+  pop.style.top=top+'px';pop.style.left=Math.min(Math.max(12,r.left+r.width/2-pw/2),innerWidth-pw-12)+'px';
+}
+function endTour(silent){
+  if(!$('#tourPop')){return}
+  $('#tourBlk')?.remove();$('#tourHl')?.remove();$('#tourPop')?.remove();
+  document.removeEventListener('keydown',tourKey,true);removeEventListener('resize',tourPlace);
+  if(!silent){store.set(TOUR_KEY,'1');if(S.chat&&S.tab!=='overview')switchTab('overview')}
+  tourI=-1;
+}
+
+/* ---------- wiring ---------- */
+$('#btnDemo').onclick=loadDemo;
+$('#homeGuide').onclick=()=>openGuide('start');
+$('#btnHelp').onclick=()=>openGuide('start');
+$('#btnMenu').onclick=openMenu;
+$('#demoExit').onclick=exitDemo;
+(function(){const set=p=>{$('#expA').hidden=p!=='android';$('#expI').hidden=p!=='ios';$$('.ptabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.p===p))};
+  $$('.ptabs button').forEach(b=>b.onclick=()=>set(b.dataset.p));
+  if(/iPhone|iPad|iPod/i.test(navigator.userAgent))set('ios')})();
 
 /* ---------- boot ---------- */
 renderSaved();
