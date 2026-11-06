@@ -722,9 +722,11 @@ const EMO=/\p{Extended_Pictographic}(?:️|[\u{1F3FB}-\u{1F3FF}])?(?:‍\p{Exten
 const LAUGH=/(?:\b(?:ha){2,}|\bhehe|\blol\b|\blmao|\brofl|😂|🤣|😆)/i;
 const OMIT=/^<?\s*(media|image|video|audio|sticker|gif|document|contact card|view once (?:photo|video|voice message))\s+omitted\s*>?$/i;
 const ATT_WORDS=/file attached|archivo adjunto|fichier joint|datei angehängt|arquivo anexado|file allegato|terlampir|dosya ekli|bestand bijgevoegd/i;
-const SYS=/end-to-end encrypted|security code (?:with|changed)|disappearing messages|is a contact\.?$|changed (?:the|this) group|created group|joined using this group|changed their phone number/i;
+/* WhatsApp's own notices, matched from the START of the body in their real shape ("<actor> <verb> …"). They used to be bare substring
+   tests, which silently dropped ordinary typed messages like "I created group chats" or "is it end-to-end encrypted?". */
+const SYS=/^(?:messages and calls are end-to-end encrypted|(?:your )?security code with .+ changed|[^:\n]{1,60}?[’']s security code changed|[^:\n]{1,60}? turned (?:on|off) disappearing messages|disappearing messages (?:were|was|are)\b|[^:\n]{1,60}? updated the message timer|[^:\n]{1,60}? created group ["“”]|[^:\n]{1,60}? changed (?:the|this) group(?:[’']s)? (?:icon|description|name|subject|settings)\b|[^:\n]{1,60}? changed the subject (?:from|to) ["\u201c\u201d]|[^:\n]{1,60}? joined using this group[’']s invite link|[^:\n]{1,60}? changed their phone number to a new number|[^:\n]{1,60}? is a contact\.?\s*$)/i;
 /* Parser guards (all inside CORE so they travel with it into the Web Worker). */
-const NOTICE=/^[^:\n]{1,60}?\s(?:created group\b|changed the subject\b|changed the group (?:subject|description|name)\b)/;   // notices whose quoted group name may itself contain ": "
+const NOTICE=/^[^:\n]{1,60}?\s(?:created group ["\u201c\u201d]|changed the subject (?:from|to) ["\u201c\u201d]|changed the group (?:subject|description|name)\b)/;   // notices whose quoted group name may itself contain ": "
 const CALL=/\b(?:voice|video) call\b|click to call back/i;   // only ever applied to WhatsApp-generated (LRM-prefixed) bodies
 const DOCOMIT=/^.+?\s•\s.*\bdocument omitted$/i;        // older iOS: "Menu.pdf • 3 pages document omitted"
 const okDate=(y,mo,d)=>mo>=1&&mo<=12&&d>=1&&d<=new Date(y,mo,0).getDate();
