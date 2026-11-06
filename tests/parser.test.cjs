@@ -136,9 +136,71 @@ test('group chat: who-replies-to-whom matrix', () => {
   assert.equal(st.mat[M][A], 1);                            // Meera replied to Asha (last message)
 });
 
-// Known gap, recorded so it is not forgotten. This older iOS document line is written from memory and has
-// NOT been checked against a real export; confirm the format before treating it as a bug.
-test('older iOS document line "name.pdf • 2 pages document omitted" is recognised as a document', { todo: true }, () => {
-  const { msgs } = parse(`[26/12/2024, 09:00:00] Asha: ${'‎'}report.pdf • ${'‎'}2 pages ${'‎'}document omitted\n`);
+// ---- Documented real-export shapes (see provenance note in fixtures.cjs) ----
+test('iOS BOM + CRLF parses identically to the clean LF file; blank lines inside a message are kept', () => {
+  const { msgs, senders } = parse(F.iosBomCrlf);
+  assert.deepEqual(senders, ['Marta', 'Anna']);              // BOM did not break the first header or the first sender name
+  assert.equal(msgs.length, 3);
+  assert.equal(msgs[0].text, "Who's booking the restaurant?");
+  assert.equal(msgs[2].text.trimEnd(), 'But first\nI need to finish work\n\nand then I\'ll come');
+});
+
+test('Android Spanish "p. m." / "a. m." markers, 2-digit year, 12AM edge', () => {
+  const { msgs } = parse(F.androidEsPm);
+  assert.deepEqual(msgs.map(m => m.t), [local(2026, 10, 5, 21, 15), local(2026, 10, 5, 23, 59), local(2026, 10, 6, 0, 5)]);
+});
+
+test('phone-number senders wrapped in U+202A…U+202C and "~ " collapse to ONE sender', () => {
+  const { senders, msgs } = parse(F.iosPhoneSenders);
+  assert.deepEqual(senders, ['+1 (555) 010-0000', 'Marta']);
+  assert.equal(msgs[0].s, msgs[1].s);
+});
+
+test('poll: option lines stay inside one message', () => {
+  const { msgs } = parse(F.iosPoll);
+  assert.equal(msgs.length, 2);
+  assert.match(msgs[0].text, /Where shall we eat\?/);
+  assert.match(msgs[0].text, /OPTION: Pizza place \(3 votes\)/);
+});
+
+test('iOS group notice "Marta created group" attributed to the group name is a system message', () => {
+  const { msgs } = parse(F.iosGroupNotices);
+  assert.equal(msgs[0].type, 'system');
+});
+
+test('typeOf: iOS sequence-prefixed attachment names', () => {
+  assert.equal(core.typeOf('00000123-PHOTO-2026-03-01-10-05-00.jpg'), 'image');
+  assert.equal(core.typeOf('00000043-VIDEO-2026-03-01-10-05-00.mp4'), 'video');
+  assert.equal(core.typeOf('00000044-AUDIO-2026-03-01-10-05-00.opus'), 'audio');
+  assert.equal(core.typeOf('Menu.pdf'), 'doc');
+});
+
+// ---- Known gaps found by checking against the documented shapes. Each is a `todo` so CI stays green but the gap
+// ---- is visible; remove `todo` when fixed. None has been confirmed against a real export by us.
+
+test('iOS notice "Marta added Anna" attributed to the group name must not create a participant', { todo: true }, () => {
+  const { senders, msgs } = parse(F.iosGroupNotices);
+  assert.equal(msgs[1].type, 'system');
+  assert.ok(!senders.includes('Sunday Dinners'), 'the group name became a sender');
+});
+
+test('"Missed voice call" lines are not counted as something the person wrote', { todo: true }, () => {
+  const { msgs } = parse(F.iosCall);
+  assert.equal(msgs[1].type, 'system');
+});
+
+test('Android notice with ": " inside a quoted group name is not split into a phantom sender', { todo: true }, () => {
+  const { senders } = parse(F.androidSubjectColon);
+  assert.deepEqual(senders, ['Marta', 'Anna']);
+});
+
+test('impossible calendar date (31/02) is rejected instead of rolling into March', { todo: true }, () => {
+  const { msgs } = parse(F.impossibleDate);
+  assert.ok(!msgs.some(m => m.t === local(2026, 3, 3, 10)), '31/02 silently became 3 March');
+});
+
+// Corroborated by chat-recap.com ("Menu.pdf • 3 pages document omitted"); still unconfirmed against a real file.
+test('older iOS document line "name.pdf • 3 pages document omitted" is recognised as a document', { todo: true }, () => {
+  const { msgs } = parse(`[26/12/2024, 09:00:00] Asha: ${'\u200e'}Menu.pdf • ${'\u200e'}3 pages ${'\u200e'}document omitted\n`);
   assert.equal(msgs[0].type, 'omitted');
 });
