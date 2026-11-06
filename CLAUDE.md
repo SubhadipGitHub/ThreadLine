@@ -9,13 +9,14 @@ Open `index.html` directly in a browser, or serve the folder with any static ser
 1. **No network, ever.** The product promise is "nothing is uploaded". The code makes zero `fetch`/XHR/WebSocket/beacon calls and loads no external scripts, fonts or images. Do not add any, including analytics, CDNs, web fonts and error reporting. Check with `grep -nE "fetch\(|XMLHttpRequest|sendBeacon|WebSocket|<script src|<link rel" index.html` (should print nothing).
 2. **Single file, zero dependencies.** Keep it deployable by copying one file. No bundler, no npm runtime deps. `tools/` is dev-only.
 3. **Escape everything user-derived.** Chat text, sender names, filenames and notes are untrusted. Route them through `esc()` before interpolating into template strings. `data-tip` attributes are written back with `innerHTML` by the tooltip handler, so escape them too (and keep tips plain text).
-4. **Real exports never enter the repo.** `.gitignore` blocks `*.zip`, `WhatsApp Chat*`, `_chat.txt`. Test with synthetic data only (`tools/make-sample-chat.mjs` or the in-app demo).
+4. **Real exports never enter the repo, and you do not read them.** `.gitignore` blocks `*.zip`, `WhatsApp Chat*`, `_chat.txt`, and `.claude/settings.json` denies reading them. Test with synthetic data (`tools/make-sample-chat.mjs` or the in-app demo). The one route for real data is `tools/sanitize-export.mjs`, run by the user, whose output the user reviews before it is committed as a fixture (`docs/SANITIZING.md`).
 
 ## Commands
 
 ```bash
 node tools/make-sample-chat.mjs out.txt [--group]   # synthetic Android-format export
 node --test "tests/*.test.cjs"                      # parser/stats unit tests, no browser or deps (Node 22+)
+node tools/sanitize-export.mjs <export.zip|.txt>    # anonymise a real export into ./sanitized-chat.txt (run by the USER; see docs/SANITIZING.md)
 node tools/smoke.cjs                                # headless end-to-end check (needs playwright + chromium)
 SHOTS=/some/dir node tools/smoke.cjs                # same, plus screenshots
 ```

@@ -3,6 +3,9 @@
 WhatsApp Chat*
 _chat.txt
 sample-chat*.txt
+# unreviewed output of tools/sanitize-export.mjs: review it, then move it under tests/fixtures/
+sanitized-chat*.txt
+*.sanitized.txt
 
 # local tooling output
 node_modules/
