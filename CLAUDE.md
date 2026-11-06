@@ -54,6 +54,7 @@ More detail in `docs/ARCHITECTURE.md`.
 ## Behaviour worth knowing
 
 - **Date order** (`dmy`/`mdy`/`ymd`) is inferred in `parseChat`: a 4-digit first field means `ymd`; otherwise any day value over 12 decides; otherwise whichever order produces fewer backwards timestamps. Very short chats with every day ≤ 12 can be ambiguous.
+- **iOS generated lines.** iOS starts bodies WhatsApp wrote itself (notices, calls, media placeholders) with U+200E. `parseChat` uses that mark (`gen`) to tell a group-name "sender" from a person; keep the `pend` resolution after the loop in step if you touch it. These heuristics are English-only and documented in `docs/STATUS.md`.
 - A "conversation start" is the first message after a **6-hour** gap (`GAP`). Reply times only count gaps under that. Median, not mean.
 - Senders can be a phone number when the contact isn't saved. "You" is chosen by the user once (`askMe`) and stored on the saved chat record; `changeMe` re-renders everything.
 - Media rows have `status`: `ok` (file present), `missing` (referenced but absent), `omitted` (WhatsApp wrote "<Media omitted>"), plus orphan files with no message. The UI calls the last three "Not exported".

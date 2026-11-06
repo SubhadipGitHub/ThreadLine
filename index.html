@@ -723,6 +723,12 @@ const LAUGH=/(?:\b(?:ha){2,}|\bhehe|\blol\b|\blmao|\brofl|😂|🤣|😆)/i;
 const OMIT=/^<?\s*(media|image|video|audio|sticker|gif|document|contact card|view once (?:photo|video|voice message))\s+omitted\s*>?$/i;
 const ATT_WORDS=/file attached|archivo adjunto|fichier joint|datei angehängt|arquivo anexado|file allegato|terlampir|dosya ekli|bestand bijgevoegd/i;
 const SYS=/end-to-end encrypted|security code (?:with|changed)|disappearing messages|is a contact\.?$|changed (?:the|this) group|created group|joined using this group|changed their phone number/i;
+/* Parser guards (all inside CORE so they travel with it into the Web Worker). */
+const NOTICE=/^[^:\n]{1,60}?\s(?:created group\b|changed the subject\b|changed the group (?:subject|description|name)\b)/;   // notices whose quoted group name may itself contain ": "
+const CALL=/\b(?:voice|video) call\b|click to call back/i;   // only ever applied to WhatsApp-generated (LRM-prefixed) bodies
+const DOCOMIT=/^.+?\s•\s.*\bdocument omitted$/i;        // older iOS: "Menu.pdf • 3 pages document omitted"
+const okDate=(y,mo,d)=>mo>=1&&mo<=12&&d>=1&&d<=new Date(y,mo,0).getDate();
+const plausible=m=>{const A=+m[1],B=+m[2],C=+m[3];if(m[1].length===4)return okDate(A,B,C);const y=C<100?C+2000:C;return okDate(y,B,A)||okDate(y,A,B)};   // false only if impossible in EVERY date order (e.g. 31/02)
 const STOP=new Set(('the and you for that this with have are was but not your all can just get what when out how its it\'s i\'m dont don\'t too will one yes yeah yea yep okay ohk okk any some they them then than there their here from also about would could should into been did does doing done had has him her his she our ours who why where which very much more most only even still well really thing things got going gonna wanna want know like make made take see say said let now new good fine sure ok bro dude man hey hii hello thanks thank thx pls plz please sorry haha hahaha lol hmm hmmm umm uhh ohh ahh yup nope sir bhai bhaiya yaar yr re ' +
  'hai hain hoon hun hua hui hue hoga hogi hoge hota hoti hote tha thi the nahi nhi nahin kya kyu kyun kyon haan han toh bhi aur aap app tum tumlog humlog hum mai main mein mera meri mere tera teri tere apna apni apne uska uski uske iska iski iske unka inka usko isko unko inko mujhe mujhko tujhe tujhko kuch sab kab kaha kahan jab tab abhi phir fir lagta lga lgta diya liya dena lena karna krna karo kro kar raha rha rahi rhi rahe rhe rahega wala wali wale bata bta batao bolo bol bola matlab acha accha achha theek thik sahi ekdum woh yeh isme usme tak par pass paas aaj kal kab bas ' +
  'media omitted attached file message deleted edited http https www com null').split(/\s+/));
@@ -743,7 +749,7 @@ function parseChat(text,fileSet,onProg){
   const lines=text.split('\n');
   for(let li=0;li<lines.length;li++){const ln=lines[li];if(onProg&&li%25000===0)onProg(li,lines.length);
     const m=RE_AND.exec(ln)||RE_IOS.exec(ln);
-    if(m){cur={a:m[1],b:m[2],c:m[3],h:+m[4],mi:+m[5],s:+(m[6]||0),ap:(m[7]||'').toLowerCase().replace(/[^ap]/g,''),rest:m[8]};raw.push(cur)}
+    if(m&&plausible(m)){cur={a:m[1],b:m[2],c:m[3],h:+m[4],mi:+m[5],s:+(m[6]||0),ap:(m[7]||'').toLowerCase().replace(/[^ap]/g,''),rest:m[8]};raw.push(cur)}
     else if(cur)cur.rest+='\n'+ln;
   }
   const mk=(r,o)=>{let y,mo,d;if(o==='ymd'){y=+r.a;mo=+r.b;d=+r.c}else if(o==='dmy'){d=+r.a;mo=+r.b;y=+r.c}else{mo=+r.a;d=+r.b;y=+r.c}if(y<100)y+=2000;let h=r.h;if(r.ap==='p'&&h<12)h+=12;if(r.ap==='a'&&h===12)h=0;return new Date(y,mo-1,d,h,r.mi,r.s).getTime()};
@@ -752,16 +758,16 @@ function parseChat(text,fileSet,onProg){
   else if(raw.some(r=>+r.a>12))order='dmy';
   else if(raw.some(r=>+r.b>12))order='mdy';
   else{const inv=o=>{let c=0,p=0;for(const r of raw){const t=mk(r,o);if(t<p)c++;p=t}return c};order=inv('mdy')<inv('dmy')?'mdy':'dmy'}
-  const senders=[],sIdx=new Map(),msgs=[];
+  const senders=[],sIdx=new Map(),msgs=[],pend=[];   // pend: LRM-generated plain-text lines whose "sender" may be the group name
   for(const r of raw){
     const t=mk(r,order),d=new Date(t);let rest=r.rest,sender=null,body=rest;
     const ci=rest.indexOf(': ');
-    if(ci>0&&ci<80&&!rest.slice(0,ci).includes('\n')){sender=rest.slice(0,ci).replace(/[‎‏‪-‮]/g,'').replace(/^~\s?/,'').trim();body=rest.slice(ci+2)}
+    if(ci>0&&ci<80&&!rest.slice(0,ci).includes('\n')&&!NOTICE.test(rest)){sender=rest.slice(0,ci).replace(/[‎‏‪-‮]/g,'').replace(/^~\s?/,'').trim();body=rest.slice(ci+2)}
+    const gen=body.charCodeAt(0)===0x200e;   // iOS starts bodies WhatsApp wrote itself (notices, calls, media placeholders) with an LRM
     body=body.replace(/^[‎‏]+/,'');
     const m={i:msgs.length,t,day:dayKey(d),s:-1,type:'text',text:body,media:null,edited:false,loc:null};
     if(!sender||(SYS.test(body)&&body.length<400)){m.type='system';msgs.push(m);continue}
-    if(!sIdx.has(sender)){sIdx.set(sender,senders.length);senders.push(sender)}
-    m.s=sIdx.get(sender);
+    if(gen&&CALL.test(body)&&body.length<200){m.type='system';msgs.push(m);continue}   // "Missed voice call" etc: nobody wrote it
     if(/\s*[‎]?<This message was edited>$/.test(m.text)){m.edited=true;m.text=m.text.replace(/\s*[‎]?<This message was edited>$/,'')}
     const first=m.text.split('\n')[0];let am;
     if(/^(This message was deleted|You deleted this message)\.?$/.test(m.text.trim())){m.type='deleted'}
@@ -770,9 +776,16 @@ function parseChat(text,fileSet,onProg){
     }
     else if((am=/<attached:\s*([^>]+)>/.exec(m.text))){m.type='media';m.att=am[1].trim();m.text=m.text.replace(am[0],'').replace(/^[‎\s]+/,'').trim()}
     else if((am=OMIT.exec(m.text.trim()))){m.type='omitted';m.okind=OMIT_TYPE[am[1].toLowerCase()]||'media';m.text=''}
+    else if(DOCOMIT.test(first.replace(/[‎‏]/g,'').trim())){m.type='omitted';m.okind='doc';m.text=''}
     const lm=/^location:\s*(https?:\/\/\S+)/i.exec(m.text);if(lm)m.loc=lm[1];
+    if(gen&&m.type==='text'&&!m.loc){m.s=-2;m.pend=sender;pend.push(m);msgs.push(m);continue}   // decide after the loop (see below)
+    if(!sIdx.has(sender)){sIdx.set(sender,senders.length);senders.push(sender)}
+    m.s=sIdx.get(sender);
     msgs.push(m);
   }
+  /* iOS attributes group notices ("Marta added Anna") to the GROUP NAME. A name whose only messages are such generated
+     plain-text lines is not a person: make those lines system messages. A real person who also typed or sent media keeps them. */
+  for(const m of pend){const k=sIdx.get(m.pend);if(k!=null)m.s=k;else{m.s=-1;m.type='system'}delete m.pend}
   return{msgs,senders,order};
 }
 

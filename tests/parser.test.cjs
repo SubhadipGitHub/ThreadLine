@@ -175,32 +175,100 @@ test('typeOf: iOS sequence-prefixed attachment names', () => {
   assert.equal(core.typeOf('Menu.pdf'), 'doc');
 });
 
-// ---- Known gaps found by checking against the documented shapes. Each is a `todo` so CI stays green but the gap
-// ---- is visible; remove `todo` when fixed. None has been confirmed against a real export by us.
+// ---- Gaps found by checking against the documented shapes (now fixed). Each has guard tests so the fix stays narrow.
+const LRM = '\u200e';
 
-test('iOS notice "Marta added Anna" attributed to the group name must not create a participant', { todo: true }, () => {
-  const { senders, msgs } = parse(F.iosGroupNotices);
+test('iOS notices attributed to the group name do not create a participant', () => {
+  const { msgs, senders } = parse(F.iosGroupNotices);
+  assert.deepEqual(senders, ['Marta', 'Anna']);              // "Sunday Dinners" is not a person
+  assert.deepEqual(msgs.map(m => m.type), ['system', 'system', 'text', 'text']);
+  const { st } = full(F.iosGroupNotices);
+  assert.equal(st.total, 2);                                  // and the notices are not counted as messages
+  assert.equal(st.per.length, 2);
+});
+
+test('guard: a real person who also has an LRM-prefixed plain-text line keeps it and stays a sender', () => {
+  const { msgs, senders } = parse(`[01/03/26, 10:00:00] Pau: ${LRM}some generated-looking text\n[01/03/26, 10:01:00] Pau: hi\n`);
+  assert.deepEqual(senders, ['Pau']);
+  assert.deepEqual(msgs.map(m => [m.type, m.s]), [['text', 0], ['text', 0]]);
+});
+
+test('guard: a sender who only ever sent photos/placeholders is still a participant', () => {
+  const { senders, msgs } = parse(`[01/03/26, 10:00:00] Ravi: ${LRM}image omitted\n[01/03/26, 10:01:00] Ravi: ${LRM}<attached: 00000001-PHOTO-2026-03-01-10-01-00.jpg>\n[01/03/26, 10:02:00] Anna: nice\n`);
+  assert.deepEqual(senders, ['Ravi', 'Anna']);
+  assert.deepEqual(msgs.map(m => m.type), ['omitted', 'media', 'text']);
+});
+
+test('guard: a group-name sender is still caught when the notices come before anyone speaks, and after', () => {
+  const t = `[05/10/26, 09:00:00] Crew: ${LRM}Marta added Anna\n[05/10/26, 09:01:00] Marta: hi\n[05/10/26, 09:02:00] Crew: ${LRM}Anna left\n`;
+  const { senders, msgs } = parse(t);
+  assert.deepEqual(senders, ['Marta']);
+  assert.deepEqual(msgs.map(m => m.type), ['system', 'text', 'system']);
+});
+
+test('"Missed voice call" and video-call lines are system messages, but the caller stays a sender', () => {
+  const { msgs, senders } = parse(F.iosCall);
+  assert.deepEqual(senders, ['Anna']);                        // Pau only appears in the call line, so is not a person here
   assert.equal(msgs[1].type, 'system');
-  assert.ok(!senders.includes('Sunday Dinners'), 'the group name became a sender');
+  const both = parse(F.iosCall + `[01/03/26, 10:03:00] Pau: back\n[01/03/26, 10:04:00] Pau: ${LRM}Video call, 3 min\n`);
+  assert.deepEqual(both.senders, ['Anna', 'Pau']);            // Pau spoke, so is real; the call lines are still system
+  assert.deepEqual(both.msgs.map(m => m.type), ['text', 'system', 'text', 'text', 'system']);
 });
 
-test('"Missed voice call" lines are not counted as something the person wrote', { todo: true }, () => {
-  const { msgs } = parse(F.iosCall);
-  assert.equal(msgs[1].type, 'system');
+test('guard: typed text that merely mentions a call (no LRM) stays a message', () => {
+  const { msgs } = parse(`[01/03/26, 10:00:00] Anna: Voice call?? where are you\n[01/03/26, 10:01:00] Anna: missed voice call from you earlier\n`);
+  assert.deepEqual(msgs.map(m => m.type), ['text', 'text']);
 });
 
-test('Android notice with ": " inside a quoted group name is not split into a phantom sender', { todo: true }, () => {
-  const { senders } = parse(F.androidSubjectColon);
-  assert.deepEqual(senders, ['Marta', 'Anna']);
+test('Android notices whose quoted group name contains ": " are system messages, not a phantom sender', () => {
+  assert.deepEqual(parse(F.androidSubjectColon).senders, ['Marta', 'Anna']);
+  const t = `14/10/2026, 00:09 - Marta created group "Dinners: season 2"\n14/10/2026, 00:10 - Anna: hi\n`;
+  const { senders, msgs } = parse(t);
+  assert.deepEqual(senders, ['Anna']);
+  assert.equal(msgs[0].type, 'system');
 });
 
-test('impossible calendar date (31/02) is rejected instead of rolling into March', { todo: true }, () => {
+test('guard: a typed message that talks about a subject change after a normal "Name: " is not treated as a notice', () => {
+  const { senders, msgs } = parse(`14/10/2026, 00:09 - Anna: Marta changed the subject from X to Y: lol\n`);
+  assert.deepEqual(senders, ['Anna']);
+  assert.equal(msgs[0].type, 'text');
+});
+
+// Pre-existing (present before the five fixes above), found by the guard test: SYS is an unanchored substring test, so
+// ordinary typed messages containing these phrases are dropped from the stats as "system" lines.
+test('typed messages that merely contain "created group" / "disappearing messages" / "end-to-end encrypted" are kept', { todo: true }, () => {
+  for (const text of ['I created group chats for everyone', 'we should use disappearing messages', 'is it end-to-end encrypted though?']) {
+    assert.equal(parse(`14/10/2026, 00:09 - Anna: ${text}\n`).msgs[0].type, 'text', text);
+  }
+});
+
+test('impossible calendar dates are not rolled into the next month; the line is kept as a continuation', () => {
   const { msgs } = parse(F.impossibleDate);
-  assert.ok(!msgs.some(m => m.t === local(2026, 3, 3, 10)), '31/02 silently became 3 March');
+  assert.equal(msgs.length, 2);                               // 31/02 is not its own message
+  assert.deepEqual(msgs.map(m => m.t), [local(2026, 2, 28, 10), local(2026, 3, 1, 10)]);
+  assert.match(msgs[0].text, /impossible date/);              // nothing is silently dropped
 });
 
-// Corroborated by chat-recap.com ("Menu.pdf • 3 pages document omitted"); still unconfirmed against a real file.
-test('older iOS document line "name.pdf • 3 pages document omitted" is recognised as a document', { todo: true }, () => {
-  const { msgs } = parse(`[26/12/2024, 09:00:00] Asha: ${'\u200e'}Menu.pdf • ${'\u200e'}3 pages ${'\u200e'}document omitted\n`);
-  assert.equal(msgs[0].type, 'omitted');
+test('guard: real dates still parse, including 29 Feb in a leap year, and 31 in 31-day months', () => {
+  assert.equal(parse('[29/02/2024, 10:00:00] A: x\n').msgs[0].t, local(2024, 2, 29, 10));
+  assert.equal(parse('[31/12/2024, 10:00:00] A: x\n').msgs[0].t, local(2024, 12, 31, 10));
+  assert.equal(parse('[2024-03-31, 10:00:00] A: x\n').msgs[0].t, local(2024, 3, 31, 10));
+  const nonLeap = parse('[28/02/2025, 10:00:00] A: x\n[29/02/2025, 10:00:00] A: y\n');
+  assert.equal(nonLeap.msgs.length, 1);                       // 29 Feb 2025 does not exist
+});
+
+test('older iOS document lines "name.pdf • N pages document omitted" are omitted documents', () => {
+  for (const line of [`Menu.pdf • 3 pages document omitted`, `${LRM}Menu.pdf • ${LRM}3 pages ${LRM}document omitted`]) {
+    const { msgs } = parse(`[26/12/2024, 09:00:00] Asha: ${line}\n`);
+    assert.deepEqual([msgs[0].type, msgs[0].okind], ['omitted', 'doc']);
+  }
+  const C = { files: new Map(), ...parse(`[26/12/2024, 09:00:00] Asha: Menu.pdf • 3 pages document omitted\n`) };
+  core.attachMedia(C);
+  assert.deepEqual([C.media[0].type, C.media[0].status], ['doc', 'omitted']);   // shows in the Media view as "Not exported"
+});
+
+test('guard: a document that WAS exported still resolves to a media attachment', () => {
+  const t = `[26/12/2024, 09:00:00] Asha: ${LRM}Menu.pdf • ${LRM}3 pages (file attached)\n`;
+  const { msgs } = parse(t, ['Menu.pdf']);
+  assert.deepEqual([msgs[0].type, msgs[0].att], ['media', 'Menu.pdf']);
 });
