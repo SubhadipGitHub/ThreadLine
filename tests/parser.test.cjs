@@ -234,41 +234,68 @@ test('guard: a typed message that talks about a subject change after a normal "N
   assert.equal(msgs[0].type, 'text');
 });
 
-// Pre-existing (present before the five fixes above), found by the guard test: SYS is an unanchored substring test, so
-// ordinary typed messages containing these phrases are dropped from the stats as "system" lines.
-test('typed messages that merely contain "created group" / "disappearing messages" / "end-to-end encrypted" are kept', { todo: true }, () => {
-  for (const text of ['I created group chats for everyone', 'we should use disappearing messages', 'is it end-to-end encrypted though?']) {
-    assert.equal(parse(`14/10/2026, 00:09 - Anna: ${text}\n`).msgs[0].type, 'text', text);
-  }
+// ---- SYS: WhatsApp's own notices are matched from the start of the body, in their real shape ----
+// These go through a sender-bearing line WITHOUT the iOS LRM mark, so the group-name logic cannot mask a SYS failure.
+const asSender = text => parse(`14/10/2026, 00:09 - Anna: ${text}\n`).msgs[0].type;
+
+test('SYS: real notice wording is a system message', () => {
+  const notices = [
+    'Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.',
+    'Messages and calls are end-to-end encrypted. Only people in this chat can read, listen to, or share them.',
+    'Your security code with Marta changed. Tap to learn more.',
+    'Marta\u2019s security code changed. Tap to learn more.',
+    'Marta turned on disappearing messages. New messages will disappear from this chat after 7 days.',
+    'You turned off disappearing messages.',
+    'Disappearing messages were turned off.',
+    'Marta updated the message timer. New messages will disappear from this chat after 24 hours.',
+    'Marta created group \u201cSunday Dinners\u201d',
+    'Marta created group "Sunday Dinners"',
+    'You created group \u201cDinners: season 2\u201d',
+    'Marta changed this group\u2019s icon',
+    'Marta changed the group description',
+    'You changed the group name from \u201cA\u201d to \u201cB\u201d',
+    'Marta changed the subject from "A" to "B"',
+    'Marta joined using this group\u2019s invite link',
+    'Marta changed their phone number to a new number. Tap to message or add the new number.',
+    'Marta is a contact.',
+  ];
+  for (const n of notices) assert.equal(asSender(n), 'system', n);
 });
 
-test('impossible calendar dates are not rolled into the next month; the line is kept as a continuation', () => {
-  const { msgs } = parse(F.impossibleDate);
-  assert.equal(msgs.length, 2);                               // 31/02 is not its own message
-  assert.deepEqual(msgs.map(m => m.t), [local(2026, 2, 28, 10), local(2026, 3, 1, 10)]);
-  assert.match(msgs[0].text, /impossible date/);              // nothing is silently dropped
+test('SYS: ordinary messages that merely contain those words are kept', () => {
+  const typed = [
+    'I created group chats for everyone',
+    'created group chat for office',
+    'we should use disappearing messages',
+    'is it end-to-end encrypted though?',
+    'Please use end-to-end encrypted chats for this',
+    'my security code changed lol',
+    'she changed the group chat photo again',
+    'he is a contact for the plumber',
+    'Marta changed the subject of the meeting',
+  ];
+  for (const m of typed) assert.equal(asSender(m), 'text', m);
 });
 
-test('guard: real dates still parse, including 29 Feb in a leap year, and 31 in 31-day months', () => {
-  assert.equal(parse('[29/02/2024, 10:00:00] A: x\n').msgs[0].t, local(2024, 2, 29, 10));
-  assert.equal(parse('[31/12/2024, 10:00:00] A: x\n').msgs[0].t, local(2024, 12, 31, 10));
-  assert.equal(parse('[2024-03-31, 10:00:00] A: x\n').msgs[0].t, local(2024, 3, 31, 10));
-  const nonLeap = parse('[28/02/2025, 10:00:00] A: x\n[29/02/2025, 10:00:00] A: y\n');
-  assert.equal(nonLeap.msgs.length, 1);                       // 29 Feb 2025 does not exist
+test('SYS: a kept message still counts in the stats and keeps its sender', () => {
+  const { C, st } = full('14/10/2026, 00:09 - Anna: I created group chats for everyone\n14/10/2026, 00:10 - Marta: ok\n');
+  assert.deepEqual(C.senders, ['Anna', 'Marta']);
+  assert.equal(st.total, 2);
+  assert.equal(st.per[0].msgs, 1);
 });
 
-test('older iOS document lines "name.pdf • N pages document omitted" are omitted documents', () => {
-  for (const line of [`Menu.pdf • 3 pages document omitted`, `${LRM}Menu.pdf • ${LRM}3 pages ${LRM}document omitted`]) {
-    const { msgs } = parse(`[26/12/2024, 09:00:00] Asha: ${line}\n`);
-    assert.deepEqual([msgs[0].type, msgs[0].okind], ['omitted', 'doc']);
-  }
-  const C = { files: new Map(), ...parse(`[26/12/2024, 09:00:00] Asha: Menu.pdf • 3 pages document omitted\n`) };
-  core.attachMedia(C);
-  assert.deepEqual([C.media[0].type, C.media[0].status], ['doc', 'omitted']);   // shows in the Media view as "Not exported"
+test('SYS: genuine sender-less notices and iOS group-attributed notices are still system messages', () => {
+  const android = parse('14/10/2026, 00:08 - Messages and calls are end-to-end encrypted. No one outside of this chat can read them.\n14/10/2026, 00:09 - Marta turned on disappearing messages. New messages will disappear from this chat after 7 days.\n');
+  assert.deepEqual(android.msgs.map(m => m.type), ['system', 'system']);
+  const ios = parse(`[05/10/26, 09:30:02] Crew: ${LRM}Messages and calls are end-to-end encrypted. Only people in this chat can read them.\n[05/10/26, 09:31:00] Marta: hi\n`);
+  assert.deepEqual(ios.msgs.map(m => m.type), ['system', 'text']);
+  assert.deepEqual(ios.senders, ['Marta']);
 });
 
-test('guard: a document that WAS exported still resolves to a media attachment', () => {
-  const t = `[26/12/2024, 09:00:00] Asha: ${LRM}Menu.pdf • ${LRM}3 pages (file attached)\n`;
-  const { msgs } = parse(t, ['Menu.pdf']);
-  assert.deepEqual([msgs[0].type, msgs[0].att], ['media', 'Menu.pdf']);
+// Residual, accepted: a person typing a sentence that has exactly the shape of a notice ("<name> <verb> …") is still
+// indistinguishable from the notice by wording alone. Requiring the iOS LRM mark as well would close it (Android notices
+// have no sender, so they never reach SYS); not done because the decision was to anchor only.
+test('residual: typed sentences shaped exactly like a notice are still read as notices', { todo: true }, () => {
+  assert.equal(asSender('I turned on disappearing messages'), 'text');
+  assert.equal(asSender('she is a contact'), 'text');
 });

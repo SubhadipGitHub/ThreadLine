@@ -31,7 +31,7 @@ Audit date: 2026-11-05. State of `index.html` after the onboarding/UX overhaul.
 
 - `fmtN` uses the `en-IN` locale, so numbers ≥ 100,000 group as 1,00,000. Intentional for an Indian audience? Confirm before changing.
 - The last message of every export keeps a trailing `\n` (the file's final blank line is appended as a continuation). Harmless in the UI; pinned in a test with `trimEnd`.
-- **Parser: `SYS` is an unanchored substring test.** Ordinary typed messages containing "created group", "disappearing messages" or "end-to-end encrypted" (under 400 chars) are classified as system lines and silently dropped from the stats. Pre-existing; found while testing the fixes below. Recorded as a `todo` test. A fix needs a design choice (anchor to the line start, or require the iOS LRM mark, or both).
+- **`SYS` (WhatsApp's own notices) is now anchored to the start of the body in each notice's real shape** (`<actor> created group “…”`, `<actor> turned on disappearing messages`, `Your security code with … changed`, …). It used to be an unanchored substring test, which silently dropped ordinary typed messages containing "created group", "disappearing messages" or "end-to-end encrypted" from the stats. Residual, accepted (`todo` test): a person typing a sentence with exactly a notice's shape (`I turned on disappearing messages`, `she is a contact`) is still read as a notice. Requiring the iOS LRM mark as well would close it, because Android notices have no sender and never reach `SYS`; not done, since the decision was to anchor only. Wording is English-only and based on public references, not a real export.
 - **Parser heuristics added 2026-11-06** (from the five gaps found against documented real shapes; none has been confirmed on a real file). They are deliberately narrow, with guard tests, but they are heuristics:
   - iOS group notices are attributed to the group name, so a "sender" whose *only* messages are LRM-prefixed plain text is treated as the group, not a person. A real participant who has any typed message or media is never affected. A person whose every line really does start with an LRM would be misread; considered very unlikely.
   - LRM-prefixed lines mentioning a voice/video call are system lines; the same words typed by a person (no LRM) are kept.
@@ -46,7 +46,7 @@ Audit date: 2026-11-05. State of `index.html` after the onboarding/UX overhaul.
 
 ## Backlog (suggested order)
 
-1. Fix the `SYS` substring false positive, then add a hand-anonymised real iOS export and non-English notice, call and document lines (the new guards are English-only).
+1. Add a hand-anonymised real iOS export and non-English notice, call and document lines (the parser guards are English-only). Optionally close the `SYS` residual by also requiring the LRM mark.
 2. A tiny synthetic zip with a few real image/video/audio files, to cover the media paths in the smoke test.
 3. Light theme and a `prefers-color-scheme` switch.
 4. Make `fmtN` locale configurable.
