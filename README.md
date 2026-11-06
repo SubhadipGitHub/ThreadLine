@@ -51,6 +51,8 @@ node --test "tests/*.test.cjs"                       # parser and stats unit tes
 node tools/smoke.cjs                                 # headless end-to-end test (needs playwright)
 ```
 
+CI runs the same checks on every pull request (`.github/workflows/test.yml`).
+
 Read [`CLAUDE.md`](CLAUDE.md) for the ground rules and code map, [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how it works, and [`docs/STATUS.md`](docs/STATUS.md) for what is verified, what is not, and the backlog.
 
 Real chat exports must never be committed; `.gitignore` blocks the usual filenames.

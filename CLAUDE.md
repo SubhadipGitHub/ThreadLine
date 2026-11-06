@@ -30,6 +30,8 @@ Unit tests load `CORE()` straight out of `index.html` (`tests/load-core.cjs` sli
 
 `tools/smoke.cjs` exits non-zero on any failed check or any console/page error. Run it after every change to `index.html`. Chromium and Playwright are preinstalled in Claude Code cloud sessions; elsewhere `npm i -D playwright && npx playwright install chromium`.
 
+CI (`.github/workflows/test.yml`) runs on every PR and push to `main`: syntax check, the no-network grep, unit tests, then the Playwright smoke test (Playwright is pinned there and installed with `--no-save`; screenshots are uploaded as an artifact). Keep the workflow's grep in step with the one above.
+
 ## Code map (search by name; line numbers drift)
 
 `index.html` is organised by `/* ---------- section ---------- */` comments, in this order:
