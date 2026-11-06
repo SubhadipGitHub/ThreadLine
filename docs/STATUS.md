@@ -13,7 +13,7 @@ Audit date: 2026-11-05. State of `index.html` after the onboarding/UX overhaul.
 
 ## Not verified, so don't assume it works
 
-- **Real iOS exports.** No real export is available to this repo and none may be committed, so the iOS fixtures are synthetic. The shapes were cross-checked on 2026-11-06 against two independent public references that describe real exports (neverfar.app/whatsapp-export-format and chat-recap.com/en/guides/whatsapp-export-file-format; links and caveats are in `tests/fixtures.cjs`). That makes them well-grounded, but none of it has been confirmed on a real file by us. To close this: anonymise a real export by hand (keep the header and placeholder lines exactly, replace names, numbers and message text), add it under `tests/fixtures/`, and keep it free of anything identifying.
+- **Real iOS exports.** No real export is available to this repo and none may be committed, so the iOS fixtures are synthetic. The shapes were cross-checked on 2026-11-06 against two independent public references that describe real exports (neverfar.app/whatsapp-export-format and chat-recap.com/en/guides/whatsapp-export-file-format; links and caveats are in `tests/fixtures.cjs`). That makes them well-grounded, but none of it has been confirmed on a real file by us. To close this: run `tools/sanitize-export.mjs` on a real export, read the output line by line, and add it under `tests/fixtures/` with a test (see `docs/SANITIZING.md`). The tool has only been exercised on invented data, never on a real export; treat its first real run as a test of the tool too.
 - **Real zips with media.** The synthetic tests have no media files, so the lightbox, thumbnails, video/audio playback, bulk .zip download and Wrapped photo-free path were only exercised through code reading and the demo.
 - **Scale.** Nothing larger than ~4,000 messages was run. The "multi-GB" design (lazy zip slices, worker parsing) is untested here.
 - **Safari and Firefox.** Only Chromium was run. `DecompressionStream('deflate-raw')` needs Safari 16.4+.
@@ -46,7 +46,7 @@ Audit date: 2026-11-05. State of `index.html` after the onboarding/UX overhaul.
 
 ## Backlog (suggested order)
 
-1. Add a hand-anonymised real iOS export and non-English notice, call and document lines (the parser guards are English-only). Confirm on a real iOS export that WhatsApp-written notices always carry the LRM (the `SYS` rule depends on it).
+1. Add a real iOS export sanitised with `tools/sanitize-export.mjs` and non-English notice, call and document lines (the parser guards are English-only). Confirm on a real iOS export that WhatsApp-written notices always carry the LRM (the `SYS` rule depends on it).
 2. A tiny synthetic zip with a few real image/video/audio files, to cover the media paths in the smoke test.
 3. Light theme and a `prefers-color-scheme` switch.
 4. Make `fmtN` locale configurable.
