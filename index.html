@@ -768,7 +768,7 @@ function parseChat(text,fileSet,onProg){
     const gen=body.charCodeAt(0)===0x200e;   // iOS starts bodies WhatsApp wrote itself (notices, calls, media placeholders) with an LRM
     body=body.replace(/^[‎‏]+/,'');
     const m={i:msgs.length,t,day:dayKey(d),s:-1,type:'text',text:body,media:null,edited:false,loc:null};
-    if(!sender||(SYS.test(body)&&body.length<400)){m.type='system';msgs.push(m);continue}
+    if(!sender||(gen&&SYS.test(body)&&body.length<400)){m.type='system';msgs.push(m);continue}   // SYS only for WhatsApp-generated (LRM) bodies; Android notices have no sender and never get here
     if(gen&&CALL.test(body)&&body.length<200){m.type='system';msgs.push(m);continue}   // "Missed voice call" etc: nobody wrote it
     if(/\s*[‎]?<This message was edited>$/.test(m.text)){m.edited=true;m.text=m.text.replace(/\s*[‎]?<This message was edited>$/,'')}
     const first=m.text.split('\n')[0];let am;
